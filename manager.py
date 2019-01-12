@@ -1,18 +1,37 @@
 import my_db
+
+
+def replace_user(recipient_id):
+    pass
+    return ''
+
+
 def check_if_new_rose_can_be_started(group_count=20):
     pass
+    return []
+
 
 def find_all_expired_roses():
     pass
+    return []
+
 
 def start_rose(rose):
     pass
 
+
 def send_information_about_new_cycle():
     pass
 
+
 def get_all_users_to_remind():
     pass
+    return []
+
+
+def send_reminder(user_id):
+    pass
+
 
 def main():
     roses_to_start = check_if_new_rose_can_be_started()
@@ -20,14 +39,13 @@ def main():
     for rose in roses_to_start:
         start_rose(rose)
 
-    users=get_all_users_to_remind()
+    users = get_all_users_to_remind()
     for user_id in users:
-        send_remider(user_id)
+        send_reminder(user_id)
 
-    exired_users = get_exired_users()
-    for user_id in expired_users:
+    for user_id in my_db.get_unsubscribed_users():
+        pass
+
 
 if __name__ == "__main__":
     main()
-
-
