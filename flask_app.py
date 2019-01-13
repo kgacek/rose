@@ -12,9 +12,19 @@ APP_ID = '1061023747434571'
 bot = Bot(ACCESS_TOKEN)
 
 
-@app.route("/login", methods=['GET'])
+def _log(msg):
+    with open('/home/kgacek/fb_bot/my.log', 'a+'):
+        print(msg)
+
+
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+    else:
+        output = request.get_json()
+        _log(str(output))
+        _log(str(request))
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
@@ -72,5 +82,5 @@ def process_message(recipient_id, msg):
 # uses PyMessenger to send response to user
 def send_message(recipient_id, response):
     # sends user the text message provided via input response parameter
-    bot.send_text_message(recipient_id, str(bot.get_user_info(recipient_id)))  # response)
+    bot.send_text_message(recipient_id,  response)
     return "success"
