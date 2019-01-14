@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 </head>
 <body>
+<script type=text/javascript src="/static/js/jquery.js"></script>
 <script>
 
   // This is called with the results from from FB.getLoginStatus().
@@ -16,16 +17,15 @@
     // for FB.getLoginStatus().
     if (response.status === 'connected') {
         FB.api("/" + response.authResponse["userID"] + "/groups",{access_token : response.authResponse["accessToken"]}, function (response2) {
-          if (response2 && !response2.error) {
-              var xhr = new XMLHttpRequest();
-              var url = "https://kgacek.pythonanywhere.com/login";
-              xhr.open("POST", url, false);
-              xhr.setRequestHeader("Content-Type", "application/json");
-              var data = JSON.stringify(response2);
-              console.log(data);
-              xhr.send(data);
+          if (response2 && !response2.error)
+              var data_json = JSON.stringify(response2, null, '\t');
+              console.log(data_json);
+              $.ajax({url         : "https://kgacek.pythonanywhere.com/login" ,
+                      method      : "post", //typ połączenia, domyślnie get
+                      contentType : 'application/json;charset=UTF-8',
+                      data        :  data_json
+              });
               testAPI();
-            }
         });
     } else {
       // The person is not logged into your app or we are unable to tell.

@@ -13,8 +13,8 @@ bot = Bot(ACCESS_TOKEN)
 
 
 def _log(msg):
-    with open('/home/kgacek/fb_bot/my.log', 'a+'):
-        print(msg)
+    with open('/home/kgacek/fb_bot/my.log', 'a+') as f:
+        f.write(msg)
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -22,9 +22,7 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        output = request.get_json()
-        _log(str(output))
-        _log(str(request))
+        _log(str(request.json.get('data')))
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
