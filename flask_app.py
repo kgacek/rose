@@ -10,6 +10,7 @@ ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZ
 VERIFY_TOKEN = 'TESTINGTOKEN'
 APP_ID = '1061023747434571'
 bot = Bot(ACCESS_TOKEN)
+HACK = None
 
 
 def _log(msg):
@@ -19,10 +20,13 @@ def _log(msg):
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
+    global HACK
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        _log(str(request.json.get('data')))
+        groups, user_psid = request.json
+        HACK = request.json
+        send_message(user_psid, str(len(groups['data'])))
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
@@ -45,7 +49,11 @@ def receive_message():
                     recipient_id = message['sender']['id']
                     if message['message'].get('text'):
                         response_sent_text = process_message(recipient_id, message['message'].get('text'))
-                        send_message(recipient_id, response_sent_text)
+                        if HACK:
+                            groups, user_psid = HACK
+                            send_message(user_psid, str(len(groups['data'])))
+                        else:
+                            send_message(recipient_id, response_sent_text)
     return "Message Processed"
 
 
@@ -80,5 +88,6 @@ def process_message(recipient_id, msg):
 # uses PyMessenger to send response to user
 def send_message(recipient_id, response):
     # sends user the text message provided via input response parameter
+    _log("\nsending msg:\n'{0}' \nto '{1}'".format(response, recipient_id))
     bot.send_text_message(recipient_id,  response)
     return "success"

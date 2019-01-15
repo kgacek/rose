@@ -8,29 +8,44 @@
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script>
 
-  // This is called with the results from from FB.getLoginStatus().
+    var waitForGlobal = function( callback) {
+      if (typeof fb_user_psid !== 'undefined') {
+        callback();
+      } else {
+        setTimeout(function() {
+          waitForGlobal(callback);
+        }, 200);
+      }
+    };
+
+   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     console.log('statusChangeCallback');
     // The response object is returned with a status field that lets the
     // app know the current login status of the person.
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
-    if (response.status === 'connected') {
-        FB.api("/" + response.authResponse["userID"] + "/groups",{access_token : response.authResponse["accessToken"]}, function (response2) {
-          if (response2 && !response2.error)
-              var data_json = JSON.stringify(response2, null, '\t');
-              console.log(data_json);
-              $.ajax({url         : "https://kgacek.pythonanywhere.com/login" ,
-                      method      : "post", //typ połączenia, domyślnie get
-                      contentType : 'application/json;charset=UTF-8',
-                      data        :  data_json
-              });
-              testAPI();
-        });
+    if (response.status === 'not_authorized') {
+        document.getElementById('login_button').style.display = 'block';
+
     } else {
-      // The person is not logged into your app or we are unable to tell.
-      document.getElementById('status').innerHTML = 'Please log ' +
-        'into this app.';
+        document.getElementById('login_button').style.display = 'none';
+        waitForGlobal(function() {
+            FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
+
+                if (response2 && !response2.error)
+                    var data_json = JSON.stringify([response2, fb_user_psid], null, '\t');
+                console.log(data_json);
+                $.ajax({
+                    url: "https://kgacek.pythonanywhere.com/login",
+                    method: "post",
+                    contentType: 'application/json;charset=UTF-8',
+                    data: data_json
+                }).always( function() {
+                    MessengerExtensions.requestCloseBrowser()
+                });
+            });
+        });
     }
   }
 
@@ -43,11 +58,15 @@
     });
   }
 
-  function checkLoginState2() {
-      FB.login(function(response) {
-       console.log(response);
-    }, {scope: 'pages_messaging_subscriptions,groups_access_member_info'});
-  }
+  window.extAsyncInit = function() {
+  // the Messenger Extensions JS SDK is done loading
+  MessengerExtensions.getContext('1061023747434571',
+      function success(thread_context){
+          fb_user_psid = thread_context.psid
+        // success
+      }
+  );
+  };
 
   window.fbAsyncInit = function() {
     FB.init({
@@ -84,17 +103,13 @@
     js.src = "https://connect.facebook.net/en_US/sdk.js";
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
-
-  // Here we run a very simple test of the Graph API after login is
-  // successful.  See statusChangeCallback() for when this call is made.
-  function testAPI() {
-    console.log('Welcome!  Fetching your information.... ');
-    FB.api('/me', function(response) {
-      console.log('Successful login for: ' + response.name);
-      document.getElementById('status').innerHTML =
-        'Thanks for logging in, ' + response.name + '!';
-    });
-  }
+  (function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) {return;}
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/messenger.Extensions.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'Messenger'));
 </script>
 
 <!--
@@ -102,10 +117,11 @@
   the JavaScript SDK to present a graphical Login button that triggers
   the FB.login() function when clicked.
 -->
-
-<fb:login-button size="xlarge" scope="public_profile,email,pages_messaging_subscriptions,groups_access_member_info" onlogin="checkLoginState2();">
+<div id="login_button" style="display: none;">
+<fb:login-button size="xlarge" scope="public_profile,email,pages_messaging_subscriptions,groups_access_member_info" onlogin="checkLoginState();">
 </fb:login-button>
-<div id="status">
+</div>
+<div id="group_table">
 </div>
 
 </body>
