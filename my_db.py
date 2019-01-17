@@ -1,20 +1,21 @@
-from sqlalchemy import create_engine, Column, String, Integer, ForeignKey, Table
+from sqlalchemy import create_engine, Column, DateTime, String, Integer, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import yaml
+import datetime
 
 Base = declarative_base()
 
 association_table_U_R = Table('association_u_r', Base.metadata, Column('users_id', String(50), ForeignKey('users.id')),
                               Column('roses_id', Integer, ForeignKey('roses.id')))
 association_table_U_I = Table('association_u_i', Base.metadata, Column('users_id', String(50), ForeignKey('users.id')),
-                              Column('intentions_url', String(60), ForeignKey('intentions.url')))
+                              Column('intentions_id', String(60), ForeignKey('intentions.id')))
 
 
 class User(Base):
     __tablename__ = 'users'
     id = Column(String(50), primary_key=True)
-    status = Column(String(50))
+    status = Column(String(50))  # NEW, VERIFIED, ACTIVE, SUBSCRIBED, OBSOLETE
     intentions = relationship("Intention", secondary=association_table_U_I, back_populates="users")
     roses = relationship("Rose", secondary=association_table_U_R, back_populates="users")
     prayers = relationship("Prayer", back_populates="user")
@@ -22,7 +23,7 @@ class User(Base):
 
 class Intention(Base):
     __tablename__ = 'intentions'
-    url = Column(String(60), primary_key=True)
+    id = Column(String(60), primary_key=True)
     name = Column(String(100))
     roses = relationship("Rose", back_populates="intention")
     users = relationship("User", secondary=association_table_U_I, back_populates="intentions")
@@ -38,8 +39,9 @@ class Patron(Base):
 class Rose(Base):
     __tablename__ = 'roses'
     id = Column(Integer, primary_key=True)
+    cycle_start_date = Column(DateTime)
     patron_id = Column(Integer, ForeignKey("patrons.id"))
-    intention_url = Column(String(60), ForeignKey("intentions.url"))
+    intention_id = Column(String(60), ForeignKey("intentions.id"))
     patron = relationship("Patron", back_populates='rose')
     intention = relationship("Intention", back_populates="roses")
     users = relationship("User", secondary=association_table_U_R, back_populates="roses")
@@ -74,13 +76,13 @@ def fill_db():
 
     #add intentions
     for el in in_data['intentions']:
-        session.add(Intention(url=in_data['intentions'][el], name=el))
+        session.add(Intention(id=in_data['intentions'][el], name=el))
 
     #add roses with patrons
     for intention in in_data['roses']:
         for patron in in_data['roses'][intention]:
             pat = Patron(name=patron)
-            rose = Rose(intention_url=intention)
+            rose = Rose(intention_id=intention)
             rose.patron = pat
             session.add(rose)
 
@@ -94,21 +96,50 @@ def fill_db():
     session.commit()
 
 
-def add_user(user_id):
+def _get_user(session, user_id, create=True, status="NEW"):
+    user = session.query(User).filter_by(id=user_id).first()
+    if not user and create:
+        user = User(id=user_id, status=status)
+        session.add(user)
+    return user
+
+
+def update_user(user_id, status="NEW"):
     session = Session()
-    if session.query(User).filter_by(id=user_id).first():
-        return False
-    session.add(User(id=user_id, status="PENDING"))
+    user = _get_user(session, user_id)
+    user.status = status
     session.commit()
-    return True
+
+
+def add_user_intentions(user_id, group_list):
+    session = Session()
+    user = _get_user(session, user_id)
+    group_dict = {el["id"]: el['name'] for el in group_list}
+    user.intentions = session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
+    if user.intentions:
+        user.status = "VERIFIED"
+    session.commit()
+    return [intention.name for intention in user.intentions]
 
 
 def subscribe_user(user_id):
-    pass
+    update_user(user_id, status="SUBSCRIBED")
 
 
-def unsubscribe_user(user_id):
-    pass
+def unsubscribe_user(user_id): # do poprawki uwzglednizc przynaleznosc do rózy
+    session = Session()
+    success = False
+    user = _get_user(session, user_id)
+    if user.status == "SUBSCRIBED" or user.status == "ACTIVE":  # we have to find new person for user prayers
+        new_user = session.query(User).filter(len(user.prayers)==0).first()
+        if new_user:
+            new_user.prayers = user.prayers
+            new_user.status = "ACTIVE"
+            success = True
+    user.prayers = []
+    user.status = "OBSOLETE"
+    session.commit()
+    return success
 
 
 def get_unsubscribed_users():

@@ -10,7 +10,7 @@ ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZ
 VERIFY_TOKEN = 'TESTINGTOKEN'
 APP_ID = '1061023747434571'
 bot = Bot(ACCESS_TOKEN)
-HACK = None
+MODS = ['1594899813943907']
 
 
 def _log(msg):
@@ -20,13 +20,16 @@ def _log(msg):
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    global HACK
     if request.method == 'GET':
         return render_template('login.html')
     else:
         groups, user_psid = request.json
-        HACK = request.json
-        send_message(user_psid, str(len(groups['data'])))
+        intentions = my_db.add_user_intentions(user_psid, groups['data'])
+        if intentions:
+            msg = "Jesteś zapisany do:\n" + '\n'.join(intentions)
+        else:
+            msg = "Nie jesteś w żadnej grupie różańcowej, najpierw dołącz do wybranej grupy"
+        send_message(user_psid, msg)
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
@@ -49,11 +52,7 @@ def receive_message():
                     recipient_id = message['sender']['id']
                     if message['message'].get('text'):
                         response_sent_text = process_message(recipient_id, message['message'].get('text'))
-                        if HACK:
-                            groups, user_psid = HACK
-                            send_message(user_psid, str(len(groups['data'])))
-                        else:
-                            send_message(recipient_id, response_sent_text)
+                        send_message(recipient_id, response_sent_text)
     return "Message Processed"
 
 
@@ -65,21 +64,18 @@ def verify_fb_token(token_sent):
     return 'Invalid verification token'
 
 
-def send_notification_to_mods(recipient_id, message, result):
-    pass
-
 
 # chooses a random message to send to the user
 def process_message(recipient_id, msg):
     if "zapisz" in msg:
-        result = my_db.add_user(recipient_id)
-        return "Zostales zapisany" if result else "Już jestes zapisany"
+        my_db.update_user(recipient_id)
+        return "Zostaleś zapisany"
     elif "wypisz" in msg:
         my_db.unsubscribe_user(recipient_id)
-        result = manager.replace_user(recipient_id)
-        send_notification_to_mods(recipient_id, "wypisany", result)
+        return "Zostaleś wypisany."
     elif "potwierdzam" == msg:
         my_db.subscribe_user(recipient_id)
+        return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
 
     else:
         return "Nie rozumiem"

@@ -1,45 +1,45 @@
 intentions:
   "Róże Różańca za przyszłych mężów i żony":
-    "https://www.facebook.com/groups/119610265368415/"
+    "119610265368415"
   "Róże Różańca za obecne i przyszłe dzieci":
-    "https://www.facebook.com/groups/148403819098087/"
+    "148403819098087"
   "Róże Różańca dzieci za rodziców":
-    "https://www.facebook.com/groups/295550347597451/"
+    "295550347597451"
   "Róża Różańca w intencji ''wszystkich wrogów''  i pokój na całym świecie":
-    "https://www.facebook.com/groups/156494314947658/"
+    "156494314947658"
   "Róże Różańca za dusze w czyśćcu cierpiące":
-    "https://www.facebook.com/groups/361086170995472/"
+    "361086170995472"
   "Róża różańca w intencjach pracy, własnego biznesu i kłopotach finansowych":
-    "https://www.facebook.com/groups/513883268968996/"
+    "513883268968996"
   "Złota Róża Różańcowa za Całe Duchowieństwo":
-    "https://www.facebook.com/groups/2021054691446805/"
+    "2021054691446805"
   "Srebrna Róża Różańcowa o jedność w Kościele Świętym":
-    "https://www.facebook.com/groups/866268920221787/"
+    "866268920221787"
   "Róża Różańca w intencji osób uzależnionych, w nałogach oraz ich rodziny":
-    "https://www.facebook.com/groups/165138554079393/"
+    "165138554079393"
   "Róże Różańcowe w intencji osób chorych i ich rodziny":
-    "https://www.facebook.com/groups/1482791215168752/"
+    "1482791215168752"
   "Róża o szybki triumf Niepokalanego Serca Maryi w sercu każdego człowieka.":
-    "https://www.facebook.com/groups/1122476827885678/"
+    "1122476827885678"
   "Róże Różańca za poczęte dzieci nienarodzone i ofiary aborcji":
-    "https://www.facebook.com/groups/527758824250082/"
+    "527758824250082"
   "Różą Różańcowa o nawrócenie zatwardziałych grzeszników":
-    "https://www.facebook.com/groups/1768460220124938/"
+    "1768460220124938"
   "Róże Różańcowe za rodziny i znajomych żyjących i zmarłych":
-    "https://www.facebook.com/groups/1561716690591937/"
+    "1561716690591937"
   "Róże Różańcowe w intencji małżeństw w kryzysie i trudnościach małżeńskich":
-    "https://www.facebook.com/groups/164379880875870/"
+    "164379880875870"
   "Różane Pogotowie Modlitewne":
-    "https://www.facebook.com/groups/1592420170816208/"
+    "1592420170816208"
   "Zanurzenie intencji modlitewnych we Krwi Pana Jezusa":
-    "https://www.facebook.com/groups/2218474785100861/"
+    "2218474785100861"
   "Róża Różańcowa w intencji osób chorych na Parkinsona":
-    "https://www.facebook.com/groups/332757387257578/"
+    "332757387257578"
   "Psałterz Różany":
-    "https://www.facebook.com/groups/642811842749838/"
+    "642811842749838"
 
 roses:
-  "https://www.facebook.com/groups/866268920221787/":
+  "866268920221787":
     - "Agnieszka z Montepulciano"
     - "Bazylii Wielki"
     - "Benedykt Opat"
@@ -54,7 +54,7 @@ roses:
     - "Matka Boża z Montligeon"
     - "Patryk"
     - "Szymon z Lipnicy"
-  "https://www.facebook.com/groups/148403819098087/":
+  "148403819098087":
     - "Agnieszka"
     - "Dolindo Ruotolo"
     - "Dominik Guzman"
@@ -69,7 +69,7 @@ roses:
     - "Pius X"
     - "Spirydon"
     - "Święta Rodzina"
-  "https://www.facebook.com/groups/164379880875870/":
+  "164379880875870":
     - "Alojzy i Maria Quattrocchi"
     - "Augustyn"
     - "Cyprian i Justyna"
@@ -85,10 +85,10 @@ roses:
     - "Zachariasz i Elżbieta"
     - "Zdzisława z Moraw"
     - "Zelia i Ludwik Martin"
-  "https://www.facebook.com/groups/642811842749838/":
+  "642811842749838":
     - "Dawid"
     - "Jezus Zmartwychwstały"
-  "https://www.facebook.com/groups/361086170995472/":
+  "361086170995472":
     - "Barbara"
     - "Brygida Szwedzka"
     - "Faustyna"
@@ -109,7 +109,7 @@ roses:
     - "Teresa od Dzieciątka Jezus"
     - "Urszula z Kolonii"
     - "Wawrzyniec"
-  "https://www.facebook.com/groups/1592420170816208/":
+  "1592420170816208":
     - "Alan de La Roche (bł.)"
     - "Antonina z Nicei"
     - "Apostoł Andrzej"
@@ -153,7 +153,7 @@ roses:
     - "Wniebowzięcie NMP"
     - "Zofia"
     - "Zyta"
-  "https://www.facebook.com/groups/2021054691446805/":
+  "2021054691446805":
     - "Aleksander Woźny"
     - "Alfons Maria Liguori"
     - "Arkadiusz z Mauretanii"
@@ -172,7 +172,7 @@ roses:
     - "Stanisław Papczyński"
     - "Stefan Wyszyński"
     - "Teresa od Jezusa z Avila"
-  "https://www.facebook.com/groups/1122476827885678/":
+  "1122476827885678":
     - "Franciszek Marto z Fatimy"
     - "Honorat Koźmiński"
     - "Jan Eudes"
@@ -183,7 +183,7 @@ roses:
     - "Najśw. Serce Jezusa i Niepokalane Serce Maryi"
     - "Rozalia Celakówna"
     - "Wenanty Katarzyniec"
-  "https://www.facebook.com/groups/527758824250082/":
+  "527758824250082":
     - "Aleksandra Męczennica"
     - "Alina z Forest"
     - "Bonawentura"
@@ -197,7 +197,7 @@ roses:
     - "Matka Boża z Guadelupe"
     - "Wincenty Ferreriusz"
     - "Władysław Król"
-  "https://www.facebook.com/groups/1561716690591937/":
+  "1561716690591937":
     - "Anna i Joachim"
     - "Dominik Savio"
     - "Dorota"
@@ -208,7 +208,7 @@ roses:
     - "Krzyż Święty"
     - "Maria od Pana Jezusa Dobrego Pasterza"
     - "Paweł VI"
-  "https://www.facebook.com/groups/1482791215168752/":
+  "1482791215168752":
     - "Apolonia"
     - "Beata"
     - "Błażej"
@@ -226,7 +226,7 @@ roses:
     - "Szczepan"
     - "Walenty"
     - "Wolfgang"
-  "https://www.facebook.com/groups/119610265368415/":
+  "119610265368415":
     - "Aniela Merici"
     - "Aniela Salawa (bł.)"
     - "Anna"
@@ -253,17 +253,17 @@ roses:
     - "Salomea"
     - "Święta Rodzina"
     - "Tomasz Apostoł"
-  "https://www.facebook.com/groups/295550347597451/":
+  "295550347597451":
     - "Anioł Stróż"
     - "Benedykt"
     - "Laura Vicuna (bł.)"
     - "Niepokalane Poczęcie"
     - "Pankracy"
     - "Ryszard de Wyche"
-  "https://www.facebook.com/groups/332757387257578/":
+  "332757387257578":
     - "Cezary z Nazjanzu"
     - "Jan Paweł II"
-  "https://www.facebook.com/groups/513883268968996/":
+  "513883268968996":
     - "﻿Andrzej Bobola"
     - "Ambroży"
     - "Cecylia"
@@ -286,7 +286,7 @@ roses:
     - "Wincenty Kadłubek"
     - "Wincenty Palotti"
     - "Wojciech"
-  "https://www.facebook.com/groups/165138554079393/":
+  "165138554079393":
     - "Agata"
     - "Anna Katarzyna Emmerich"
     - "Apostoł Maciej"
@@ -307,7 +307,7 @@ roses:
     - "Matt Talbot"
     - "Piotr Klawer"
     - "Trzech Mędrców ze Wschodu"
-  "https://www.facebook.com/groups/1768460220124938/":
+  "1768460220124938":
     - "Aleksy Wyznawca"
     - "Antoni Padewski"
     - "Apostoł Piotr"
@@ -323,7 +323,7 @@ roses:
     - "Ksenia Petersburska"
     - "Stanisław Kazimierczyk"
     - "Szymon Słupnik"
-  "https://www.facebook.com/groups/156494314947658/":
+  "156494314947658":
     - "Apostoł Paweł z Tarsu"
     - "Archanioł Michał"
     - "Dyzma Dobry Łotr"
