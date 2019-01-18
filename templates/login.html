@@ -19,8 +19,55 @@
         }
     };
 
+    function genTable(data) {
+        var myTable = document.getElementById('myTable');
+        var row = document.createElement("THEAD");
+        var cell = document.createElement("TD");
+        cell.innerText = "patron";
+        row.appendChild(cell);
+        cell = document.createElement("TD");
+        cell.innerText = "nr taj.";
+        row.appendChild(cell);
+        myTable.appendChild(row);
+        for (intention in data) {
+            row = document.createElement("TR");
+            cell = document.createElement("TD");
+            cell.innerText = intention;
+            row.appendChild(cell);
+            myTable.appendChild(row);
+            row = document.createElement("TR")
+
+            var select = document.createElement('select');
+            select.name=intention
+            for (rose in data[intention]) {
+                var option = document.createElement('option');
+                option.value = data[intention][rose];
+                option.text = data[intention][rose];
+                select.appendChild(option);
+            }
+            cell = document.createElement("TD");
+            cell.appendChild(select);
+            row.appendChild(cell);
+            cell = document.createElement("TD");
+            var x = document.createElement("INPUT");
+            x.setAttribute("type", "text");
+            x.setAttribute("maxlength", 2);
+            x.setAttribute("size", 2);
+            x.name=intention+"taj"
+            cell.appendChild(x);
+            row.appendChild(cell);
+            myTable.appendChild(row);
+
+        }
+    };
+
     function already_user() {
-        document.getElementById('choice_buttons').style.display = 'none';
+        $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
+            user_id: fb_user_psid
+        }, function (data) {
+            document.getElementById('myForm').style.display = 'block'
+            genTable(data);
+        });
 
     }
 
@@ -138,6 +185,12 @@
     <a href="#" onclick="already_user()" class="myButton">TAK</a>
     <a href="#" onclick="new_user()" class="myButton">NIE</a>
 </div>
+
+<form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
+<table id="myTable" width="100%"></table>
+  <input type="submit" value="Submit">
+</form>
+
 
 </body>
 </html>

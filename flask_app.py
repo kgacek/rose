@@ -1,5 +1,5 @@
 # Python libraries that we need to import for our bot
-from flask import Flask, request, render_template
+from flask import Flask, jsonify, request, render_template
 from pymessenger.bot import Bot
 
 import my_db
@@ -17,6 +17,15 @@ def _log(msg):
     with open('/home/kgacek/fb_bot/my.log', 'a+') as f:
         f.write(msg)
 
+
+@app.route('/_get_users_intentions',methods=['GET', 'POST'])
+def get_users_intentions():
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        return jsonify(my_db.get_user_intentions(user_id))
+    else:
+        data = request.form
+        _log(str(data))
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():

@@ -122,6 +122,17 @@ def add_user_intentions(user_id, group_list):
     return [intention.name for intention in user.intentions]
 
 
+def get_user_intentions(user_id):
+    session = Session()
+    user = _get_user(session, user_id)
+    intensions = {}
+    for intention in user.intentions:
+        intensions[intention.name] = []
+        for rose in intention.roses:
+            intensions[intention.name].append(rose.patron.name)
+    return intensions
+
+
 def subscribe_user(user_id):
     update_user(user_id, status="SUBSCRIBED")
 
