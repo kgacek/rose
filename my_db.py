@@ -45,6 +45,7 @@ class Rose(Base):
     patron = relationship("Patron", back_populates='rose')
     intention = relationship("Intention", back_populates="roses")
     users = relationship("User", secondary=association_table_U_R, back_populates="roses")
+    prayers = relationship("Prayer", back_populates="rose")
 
 
 class Mystery(Base):
@@ -60,6 +61,7 @@ class Prayer(Base):
     rose_id = Column(Integer, ForeignKey("roses.id"))
     user_id = Column(String(50), ForeignKey('users.id'))
     user = relationship("User", back_populates="prayers")
+    rose = relationship("Rose", back_populates="prayers")
 
 
 engine = create_engine("mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8", echo=True)
@@ -131,6 +133,22 @@ def get_user_intentions(user_id):
         for rose in intention.roses:
             intensions[intention.name].append(rose.patron.name)
     return intensions
+
+def add_user_roses(data):
+    session = Session()
+    user = _get_user(session, data['user_id'])
+    for intention in user.intentions:
+        for rose in intention.roses:
+            if rose.patron.name == data[intention.name]:
+                user.roses.append(rose)
+                prayer = Prayer(mystery_id=data[intention.name+'taj'])
+                prayer.rose = rose
+                prayer.user = user
+                session.add(prayer)
+    session.commit()
+    return True
+
+
 
 
 def subscribe_user(user_id):

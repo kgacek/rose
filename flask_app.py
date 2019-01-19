@@ -25,7 +25,9 @@ def get_users_intentions():
         return jsonify(my_db.get_user_intentions(user_id))
     else:
         data = request.form
-        _log(str(data))
+        my_db.add_user_roses(data)
+        return "Message Processed"
+
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():

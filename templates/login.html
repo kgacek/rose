@@ -25,6 +25,11 @@
         var cell = document.createElement("TD");
         cell.innerText = "patron";
         row.appendChild(cell);
+        cell = document.createElement("INPUT");
+        cell.name="user_id";
+        cell.value=fb_user_psid;
+        cell.style.display = 'none';
+        row.appendChild(cell);
         cell = document.createElement("TD");
         cell.innerText = "nr taj.";
         row.appendChild(cell);
@@ -59,7 +64,7 @@
             myTable.appendChild(row);
 
         }
-    };
+    }
 
     function already_user() {
         $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
