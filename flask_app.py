@@ -18,7 +18,7 @@ def _log(msg):
         f.write(msg)
 
 
-@app.route('/_get_users_intentions',methods=['GET', 'POST'])
+@app.route('/_get_users_intentions', methods=['GET', 'POST'])
 def get_users_intentions():
     if request.method == 'GET':
         user_id = request.args.get('user_id')
