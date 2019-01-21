@@ -1,8 +1,10 @@
-from my_db import metadata, User, Intention, Prayer
-from flask_sqlalchemy import SQLAlchemy
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from datetime import date
-from dateutil.relativedelta import relativedelta
+from flask_sqlalchemy import SQLAlchemy
+from datetime import date, timedelta
+
+from my_db import metadata, User, Intention, Prayer, AssociationUR
 
 db = SQLAlchemy(metadata=metadata)
 
@@ -35,6 +37,9 @@ def get_user_intentions(user_id):
     for intention in user.intentions:
         intentions[intention.name] = []
         for rose in intention.roses:
+            if rose.id in [rose.rose_id for rose in user.roses]:
+                del intentions[intention.name]
+                break
             intentions[intention.name].append(rose.patron.name)
     return intentions
 
@@ -46,9 +51,10 @@ def set_user_roses(data):
     for intention in user.intentions:
         for rose in intention.roses:
             if rose.patron.name == data[intention.name]:
-                user.roses.append(rose)
-                prayer = Prayer(mystery_id=data[intention.name + 'taj'], started=date.today().replace(day=1))
-                prayer.ends = prayer.started + relativedelta(months=1)
+                asso = AssociationUR(status="ACTIVE")
+                asso.rose = rose
+                user.roses.append(asso)
+                prayer = Prayer(mystery_id=data[intention.name + '_mystery'])
                 prayer.rose = rose
                 prayer.user = user
                 db.session.add(prayer)
@@ -56,14 +62,17 @@ def set_user_roses(data):
     return True
 
 
-def subscribe_user(user_id):
-    update_user(user_id, status="SUBSCRIBED")
+def subscribe_user(user_id, offset=5):
+    expiring_association = db.session.query(AssociationUR).\
+                        filter_by(user_id=user_id).\
+                        filter(AssociationUR.rose.ends - timedelta(days=offset) < date.today()).all()
+    for association in expiring_association:
+        association.status = 'SUBSCRIBED'
+    db.session.commit()
 
 
 def unsubscribe_user(user_id):
     user = _get_user(user_id)
-    for prayer in user.prayers:
-        prayer.rose = None
     user.roses = []
     user.intentions = []
     user.status = "OBSOLETE"

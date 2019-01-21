@@ -55,10 +55,13 @@
             row.appendChild(cell);
             cell = document.createElement("TD");
             var x = document.createElement("INPUT");
-            x.setAttribute("type", "text");
-            x.setAttribute("maxlength", 2);
-            x.setAttribute("size", 2);
-            x.name=intention+"taj"
+            x.setAttribute("type", "number");
+            x.setAttribute("maxlength", '2');
+            x.style.width = "3em";
+            x.min='1';
+            x.max='20';
+            x.required = true;
+            x.name=intention+"_mystery";
             cell.appendChild(x);
             row.appendChild(cell);
             myTable.appendChild(row);

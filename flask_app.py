@@ -1,9 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Python libraries that we need to import for our bot
 from flask import Flask, jsonify, request, render_template
 from pymessenger.bot import Bot
 
 import flask_db
-import manager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
@@ -85,8 +86,6 @@ def verify_fb_token(token_sent):
     return 'Invalid verification token'
 
 
-
-# chooses a random message to send to the user
 def process_message(recipient_id, msg):
     if "zapisz" in msg:
         flask_db.update_user(recipient_id)

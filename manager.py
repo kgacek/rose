@@ -1,50 +1,150 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from pymessenger.bot import Bot
+import yaml
+from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
+from collections import defaultdict
+
+from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR
 import my_db
 
+ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
+bot = Bot(ACCESS_TOKEN)
 
-def replace_user(recipient_id):
-    pass
-    return ''
+engine = create_engine("mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8",
+                       pool_recycle=280,
+                       pool_size=3,
+                       max_overflow=0,
+                       echo=True)
 
-
-def check_if_new_rose_can_be_started(group_count=20):
-    pass
-    return []
-
-
-def find_all_expired_roses():
-    pass
-    return []
+Session = sessionmaker(bind=engine)
 
 
-def start_rose(rose):
-    pass
+def fill_db():
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    session = Session()
+    with open('input_data.yaml') as f:
+        in_data = yaml.load(f)
+
+    # add intentions
+    for el in in_data['intentions']:
+        session.add(Intention(id=in_data['intentions'][el], name=el))
+
+    # add roses with patrons
+    for intention in in_data['roses']:
+        for patron in in_data['roses'][intention]:
+            pat = Patron(name=patron)
+            rose = Rose(intention_id=intention,
+                        started=date.today().replace(day=1),
+                        ends=date.today().replace(day=1) + relativedelta(months=1),
+                        patron=pat)
+            session.add(rose)
+
+    # add patrons
+    for el in in_data['patrons']:
+        session.add(Patron(name=el))
+
+    for el in in_data['mysteries']:
+        session.add(Mystery(name=el))
+
+    session.commit()
 
 
-def send_information_about_new_cycle():
-    pass
+class Manager(object):
+    def __init__(self):
+        self.session = Session()
 
+    def get_not_confirmed_users(self, offset=5):  # all user-rose pair with'ACTIVE' status <offset> days before end
+        expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=offset) + date.today()).all()
+        msg = defaultdict(list)
+        for rose in expiring_roses:
+            for association in rose.users:
+                if association.status == "ACTIVE":
+                    msg[association.user_id].append((rose.intention.name, rose.patron.name, rose.ends))
+        return msg
 
-def get_all_users_to_remind():
-    pass
-    return []
+    def switch_users(self):
+        expired_roses = self.session.query(Rose).filter(Rose.ends == date.today()).all()
+        msg = {}
+        for rose in expired_roses:
+            rose.started = rose.ends
+            rose.ends = rose.ends + relativedelta(months=1)
+            for association in rose.users:
+                if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
+                    association.status = "ACTIVE"
+                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1,
+                                 rose=rose,
+                                 user=association.user)
+                    association.prayers.append(new)
+                elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
+                    self.session.delete(association)
+        self.session.commit()
+        return msg
 
+    def create_new_rose(self, user, intention):
+        patron = self.session.query(Patron).filter(not Patron.rose).first()
+        rose = Rose(intention_id=intention,
+                    started=date.today(),
+                    ends=date.today() + relativedelta(months=1),
+                    patron=patron)
+        asso = AssociationUR(status="ACTIVE")
+        asso.rose = rose
+        user.roses.append(asso)
 
-def send_reminder(user_id):
-    pass
+    def get_unsubscribed_users(self):
+        active_users = self.session.query(User).filter_by(status="ACTIVE").all()
+        expired_users = [user.id for user in active_users if len(user.roses) < len(user.intentions)]
+        unsubscibed_users = [user.id for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
+        return expired_users, unsubscibed_users
+
+    def attach_new_users_to_roses(self):
+        verified_users = self.session.query(User).filter_by(status="VERIFIED").all()
+        for user in verified_users:
+            for intention in user.intentions:
+                roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
+                filtered_roses = [rose for rose in roses_candidates if len(rose.users) > 20]
+                if filtered_roses:
+                    asso = AssociationUR(status="ACTIVE")
+                    asso.rose = filtered_roses[0]
+                    user.roses.append(asso)
+                else:
+                    self.create_new_rose(user, intention)
+            user.status = "ACTIVE"
+            self.session.commit()
+
+    def send_reminder(self, user_id, roses):
+        msg = "Róże w których modlisz się w tym miesiącu:\n"
+        for intention, patron, ends in roses:
+            msg += "Intencja: {}; Patron: {}; kończy się: {}\n".format(intention, patron, str(ends))
+        msg += "Jesli chcesz kontynuować modlitwę w przyszłym miesiacu, napisz/naciśnij 'potwierdzam'.\n "
+        msg += "Jeśli nie chcesz więcej brać udziału w różach, napisz/naciśnij 'wypisz mnie'"
+
+        bot.send_text_message(user_id, msg)
+
+    def send_notification_about_expired_users(self, expired, unsubscribed):
+        msg = ''
+        for user_id in expired:
+            msg += bot.get_user_info(user_id)
+        for user_id in unsubscribed:
+            msg += bot.get_user_info(user_id)
+        print(msg)
 
 
 def main():
-    roses_to_start = check_if_new_rose_can_be_started()
-    roses_to_start += find_all_expired_roses()
-    for rose in roses_to_start:
-        start_rose(rose)
+    manager = Manager()
+    users = manager.get_not_confirmed_users()
+    for user_id, roses in users.items():
+        manager.send_reminder(user_id, roses)
 
-    users = get_all_users_to_remind()
-    for user_id in users:
-        send_reminder(user_id)
+    manager.send_notification_about_expired_users(*manager.get_unsubscribed_users())
 
-    for user_id in my_db.get_unsubscribed_users():
-        pass
+    manager.switch_users()
+    manager.attach_new_users_to_roses()
 
 
 if __name__ == "__main__":
