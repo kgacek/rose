@@ -25,25 +25,24 @@ def add_user_intentions(user_id, group_list):
     user = _get_user(user_id)
     group_dict = {el["id"]: el['name'] for el in group_list}
     user.intentions = db.session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
-    if user.intentions:
-        user.status = "VERIFIED"
     db.session.commit()
     return [intention.name for intention in user.intentions]
 
 
 def get_user_intentions(user_id):
     user = _get_user(user_id)
-    intensions = {}
+    intentions = {}
     for intention in user.intentions:
-        intensions[intention.name] = []
+        intentions[intention.name] = []
         for rose in intention.roses:
-            intensions[intention.name].append(rose.patron.name)
-    return intensions
+            intentions[intention.name].append(rose.patron.name)
+    return intentions
 
 
-def add_user_roses(data):
+def set_user_roses(data):
     user = _get_user(data['user_id'])
     user.status = "ACTIVE"
+    user.roses = []
     for intention in user.intentions:
         for rose in intention.roses:
             if rose.patron.name == data[intention.name]:

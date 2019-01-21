@@ -70,18 +70,20 @@
         $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
             user_id: fb_user_psid
         }, function (data) {
-            document.getElementById('myForm').style.display = 'block'
+            document.getElementById('myForm').style.display = 'block';
             genTable(data);
         });
 
     }
 
     function new_user() {
-        MessengerExtensions.requestCloseBrowser()
+        $.getJSON("https://kgacek.pythonanywhere.com/_set_user_status_to_verified", {
+            user_id: fb_user_psid
+        }, function () {
+            MessengerExtensions.requestCloseBrowser();
+        });
     }
 
-
-    // This is called with the results from from FB.getLoginStatus().
     function statusChangeCallback(response) {
         console.log('statusChangeCallback');
         if (response.status === 'not_authorized') {
@@ -108,9 +110,6 @@
         }
     }
 
-    // This function is called when someone finishes with the Login
-    // Button.  See the onlogin handler attached to it in the sample
-    // code below.
     function checkLoginState() {
         FB.getLoginStatus(function (response) {
             statusChangeCallback(response);
@@ -181,7 +180,7 @@
   the FB.login() function when clicked.
 -->
 <div id="login_button" style="display: none;">
-    <fb:login-button size="xlarge" scope="public_profile,email,pages_messaging_subscriptions,groups_access_member_info"
+    <fb:login-button size="xlarge" scope="public_profile,pages_messaging_subscriptions,groups_access_member_info"
                      onlogin="checkLoginState();">
     </fb:login-button>
 </div>

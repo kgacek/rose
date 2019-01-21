@@ -20,6 +20,13 @@ def _log(msg):
         f.write(msg)
 
 
+@app.route('/_set_user_status_to_verified')
+def set_user_status_to_verified():
+    user_id = request.args.get('user_id')
+    flask_db.update_user(user_id, status="VERIFIED")
+    return 'success'
+
+
 @app.route('/_get_users_intentions', methods=['GET', 'POST'])
 def get_users_intentions():
     if request.method == 'GET':
@@ -27,7 +34,7 @@ def get_users_intentions():
         return jsonify(flask_db.get_user_intentions(user_id))
     else:
         data = request.form
-        flask_db.add_user_roses(data)
+        flask_db.set_user_roses(data)
         return "Message Processed"
 
 
@@ -43,6 +50,7 @@ def login():
         else:
             msg = "Nie jesteś w żadnej grupie różańcowej, najpierw dołącz do wybranej grupy"
         send_message(user_psid, msg)
+        return msg
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
