@@ -2,10 +2,12 @@
 from flask import Flask, jsonify, request, render_template
 from pymessenger.bot import Bot
 
-import my_db
+import flask_db
 import manager
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
+flask_db.db.init_app(app)
 ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
 VERIFY_TOKEN = 'TESTINGTOKEN'
 APP_ID = '1061023747434571'
@@ -22,10 +24,10 @@ def _log(msg):
 def get_users_intentions():
     if request.method == 'GET':
         user_id = request.args.get('user_id')
-        return jsonify(my_db.get_user_intentions(user_id))
+        return jsonify(flask_db.get_user_intentions(user_id))
     else:
         data = request.form
-        my_db.add_user_roses(data)
+        flask_db.add_user_roses(data)
         return "Message Processed"
 
 
@@ -35,7 +37,7 @@ def login():
         return render_template('login.html')
     else:
         groups, user_psid = request.json
-        intentions = my_db.add_user_intentions(user_psid, groups['data'])
+        intentions = flask_db.add_user_intentions(user_psid, groups['data'])
         if intentions:
             msg = "Jesteś zapisany do:\n" + '\n'.join(intentions)
         else:
@@ -79,13 +81,13 @@ def verify_fb_token(token_sent):
 # chooses a random message to send to the user
 def process_message(recipient_id, msg):
     if "zapisz" in msg:
-        my_db.update_user(recipient_id)
+        flask_db.update_user(recipient_id)
         return "Zostaleś zapisany"
     elif "wypisz" in msg:
-        my_db.unsubscribe_user(recipient_id)
+        flask_db.unsubscribe_user(recipient_id)
         return "Zostaleś wypisany."
     elif "potwierdzam" == msg:
-        my_db.subscribe_user(recipient_id)
+        flask_db.subscribe_user(recipient_id)
         return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
 
     else:

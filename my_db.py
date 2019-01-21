@@ -1,12 +1,10 @@
-from sqlalchemy import create_engine, Column, Date, String, Integer, ForeignKey, Table
+from sqlalchemy import MetaData, create_engine, Column, Date, String, Integer, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import yaml
 
-from datetime import date, timedelta
-from dateutil.relativedelta import relativedelta
-
-Base = declarative_base()
+metadata = MetaData()
+Base = declarative_base(metadata=metadata)
 
 association_table_U_R = Table('association_u_r', Base.metadata, Column('users_id', String(50), ForeignKey('users.id')),
                               Column('roses_id', Integer, ForeignKey('roses.id')))
@@ -72,7 +70,7 @@ engine = create_engine("mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-se
                        pool_size=3,
                        max_overflow=0,
                        echo=True)
-# Base.metadata.create_all(engine)
+
 Session = sessionmaker(bind=engine)
 
 
@@ -103,77 +101,6 @@ def fill_db():
         session.add(Mystery(name=el))
 
     session.commit()
-
-
-def _get_user(session, user_id, create=True, status="NEW"):
-    user = session.query(User).filter_by(id=user_id).first()
-    if not user and create:
-        user = User(id=user_id, status=status)
-        session.add(user)
-    return user
-
-
-def update_user(user_id, status="NEW"):
-    session = Session()
-    user = _get_user(session, user_id)
-    user.status = status
-    session.commit()
-
-
-def add_user_intentions(user_id, group_list):
-    session = Session()
-    user = _get_user(session, user_id)
-    group_dict = {el["id"]: el['name'] for el in group_list}
-    user.intentions = session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
-    if user.intentions:
-        user.status = "VERIFIED"
-    session.commit()
-    return [intention.name for intention in user.intentions]
-
-
-def get_user_intentions(user_id):
-    session = Session()
-    user = _get_user(session, user_id)
-    intensions = {}
-    for intention in user.intentions:
-        intensions[intention.name] = []
-        for rose in intention.roses:
-            intensions[intention.name].append(rose.patron.name)
-    session.close()
-    return intensions
-
-
-def add_user_roses(data):
-    session = Session()
-    user = _get_user(session, data['user_id'])
-    user.status = "ACTIVE"
-    for intention in user.intentions:
-        for rose in intention.roses:
-            if rose.patron.name == data[intention.name]:
-                user.roses.append(rose)
-                prayer = Prayer(mystery_id=data[intention.name + 'taj'], started=date.today().replace(day=1))
-                prayer.ends = prayer.started + relativedelta(months=1)
-                prayer.rose = rose
-                prayer.user = user
-                session.add(prayer)
-    session.commit()
-    return True
-
-
-def subscribe_user(user_id):
-    update_user(user_id, status="SUBSCRIBED")
-
-
-def unsubscribe_user(user_id):
-    session = Session()
-    user = _get_user(session, user_id)
-    for prayer in user.prayers:
-        prayer.rose = None
-    user.roses = []
-    user.intentions = []
-    user.status = "OBSOLETE"
-    session.commit()
-
 
 def get_not_confirmed_users(offset=5):
     session = Session()
