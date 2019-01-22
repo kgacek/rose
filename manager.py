@@ -9,8 +9,8 @@ from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 
-from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR
-import my_db
+from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR, OFFSET
+
 
 ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
 bot = Bot(ACCESS_TOKEN)
@@ -59,8 +59,8 @@ class Manager(object):
     def __init__(self):
         self.session = Session()
 
-    def get_not_confirmed_users(self, offset=5):  # all user-rose pair with'ACTIVE' status <offset> days before end
-        expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=offset) + date.today()).all()
+    def get_not_confirmed_users(self):  # all user-rose pair with'ACTIVE' status <offset> days before end
+        expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=OFFSET) + date.today()).all()
         msg = defaultdict(list)
         for rose in expiring_roses:
             for association in rose.users:
@@ -77,9 +77,7 @@ class Manager(object):
             for association in rose.users:
                 if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
                     association.status = "ACTIVE"
-                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1,
-                                 rose=rose,
-                                 user=association.user)
+                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
                     self.session.delete(association)

@@ -5,6 +5,8 @@ from sqlalchemy import MetaData, Column, Date, String, Integer, ForeignKey, Tabl
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
+OFFSET = 12
+
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
 

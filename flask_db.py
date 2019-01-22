@@ -4,7 +4,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
 
-from my_db import metadata, User, Intention, Prayer, AssociationUR
+from my_db import metadata, User, Intention, Prayer, AssociationUR, OFFSET
 
 db = SQLAlchemy(metadata=metadata)
 
@@ -55,17 +55,15 @@ def set_user_roses(data):
                 asso.rose = rose
                 user.roses.append(asso)
                 prayer = Prayer(mystery_id=data[intention.name + '_mystery'])
-                prayer.rose = rose
-                prayer.user = user
+                prayer.association = asso
                 db.session.add(prayer)
     db.session.commit()
     return True
 
 
-def subscribe_user(user_id, offset=5):
-    expiring_association = db.session.query(AssociationUR).\
-                        filter_by(user_id=user_id).\
-                        filter(AssociationUR.rose.ends - timedelta(days=offset) < date.today()).all()
+def subscribe_user(user_id):
+    user_asso = db.session.query(AssociationUR).filter_by(user_id=user_id).all()
+    expiring_association = [asso for asso in user_asso if asso.rose.ends < timedelta(days=OFFSET) + date.today()]
     for association in expiring_association:
         association.status = 'SUBSCRIBED'
     db.session.commit()
