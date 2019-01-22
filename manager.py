@@ -77,7 +77,7 @@ class Manager(object):
             for association in rose.users:
                 if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
                     association.status = "ACTIVE"
-                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1)
+                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1, ends=rose.ends)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
                     self.session.delete(association)
@@ -85,13 +85,15 @@ class Manager(object):
         return msg
 
     def create_new_rose(self, user, intention):
-        patron = self.session.query(Patron).filter(not Patron.rose).first()
-        rose = Rose(intention_id=intention,
+        patron = self.session.query(Patron).filter(Patron.rose == None).first()
+        rose = Rose(intention_id=intention.id,
                     started=date.today(),
                     ends=date.today() + relativedelta(months=1),
-                    patron=patron)
+                    patron_id=patron.id)
         asso = AssociationUR(status="ACTIVE")
         asso.rose = rose
+        new = Prayer(mystery_id=1, ends=rose.ends)
+        asso.prayers.append(new)
         user.roses.append(asso)
 
     def get_unsubscribed_users(self):
@@ -100,15 +102,28 @@ class Manager(object):
         unsubscibed_users = [user.id for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
         return expired_users, unsubscibed_users
 
+    def get_free_mystery(self, rose):
+        current_mysteries = []
+        for asso in rose.users:
+            for prayer in asso.prayers:
+                if prayer.ends == rose.ends:
+                    current_mysteries.append(prayer.mystery_id)
+        for i in range(1, 21):
+            if i not in current_mysteries:
+                return i
+        return 0
+
     def attach_new_users_to_roses(self):
         verified_users = self.session.query(User).filter_by(status="VERIFIED").all()
         for user in verified_users:
             for intention in user.intentions:
                 roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
-                filtered_roses = [rose for rose in roses_candidates if len(rose.users) > 20]
+                filtered_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
                 if filtered_roses:
                     asso = AssociationUR(status="ACTIVE")
                     asso.rose = filtered_roses[0]
+                    new = Prayer(mystery_id=self.get_free_mystery(filtered_roses[0]), ends=filtered_roses[0].ends)
+                    asso.prayers.append(new)
                     user.roses.append(asso)
                 else:
                     self.create_new_rose(user, intention)

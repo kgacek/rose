@@ -52,7 +52,7 @@ class Rose(Base):
     id = Column(Integer, primary_key=True)
     patron_id = Column(Integer, ForeignKey("patrons.id"))
     intention_id = Column(String(60), ForeignKey("intentions.id"))
-    started = Column(Date)
+    started = Column(Date)  # moze wywalic to?
     ends = Column(Date)
     patron = relationship("Patron", back_populates='rose')
     intention = relationship("Intention", back_populates="roses")
@@ -68,6 +68,7 @@ class Mystery(Base):
 class Prayer(Base):
     __tablename__ = 'prayers'
     id = Column(Integer, primary_key=True)
+    ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
     user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
     association = relationship("AssociationUR", back_populates="prayers")

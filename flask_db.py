@@ -54,7 +54,7 @@ def set_user_roses(data):
                 asso = AssociationUR(status="ACTIVE")
                 asso.rose = rose
                 user.roses.append(asso)
-                prayer = Prayer(mystery_id=data[intention.name + '_mystery'])
+                prayer = Prayer(mystery_id=data[intention.name + '_mystery'], ends=rose.ends)
                 prayer.association = asso
                 db.session.add(prayer)
     db.session.commit()
