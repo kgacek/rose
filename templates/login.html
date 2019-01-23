@@ -94,6 +94,7 @@
 
         } else {
             document.getElementById('login_button').style.display = 'none';
+            document.getElementById('choice_buttons').style.display = 'block';
             waitForGlobal(function () {
                 FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
 
