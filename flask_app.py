@@ -9,7 +9,8 @@ import flask_db
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
 flask_db.db.init_app(app)
-ACCESS_TOKEN = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
+ACCESS_TOKEN = 'EAAPEZCteQaEsBAKNZBZCT9s9sDPUnsIzYTKGTmUE4ZAGdPiQwi0jBWAnZB2aiDdg6z08ZAGPJrggrwAqr1oJEtKr8J3UphXMK5rlFmUgjZAyOIAsY5B8MrW0bjFw0JjoV64hpOnsPQNQRtI7i92tiqTBf5ZBXlAMGc7KeHiFaZBlUJZChkfcSHSmO1'
+ACCESS_TOKEN2 = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
 VERIFY_TOKEN = 'TESTINGTOKEN'
 APP_ID = '1061023747434571'
 bot = Bot(ACCESS_TOKEN)
@@ -19,6 +20,11 @@ MODS = ['1594899813943907']
 def _log(msg):
     with open('/home/kgacek/fb_bot/my.log', 'a+') as f:
         f.write(msg)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/_set_user_status_to_verified')
@@ -36,7 +42,7 @@ def get_users_intentions():
     else:
         data = request.form
         flask_db.set_user_roses(data)
-        return "Message Processed"
+        return "Message Processed, You can close this window"
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -55,7 +61,7 @@ def login():
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/_webhook", methods=['GET', 'POST'])
 def receive_message():
     if request.method == 'GET':
         """Before allowing people to message your bot, Facebook has implemented a verify token
@@ -87,6 +93,8 @@ def verify_fb_token(token_sent):
 
 
 def process_message(recipient_id, msg):
+    if "we have new user" in msg:
+        return "Witaj w Aplikacji Róż Różańca. Wybierz 'pobierz grupy' z menu aby się zapisać."
     if "zapisz" in msg:
         flask_db.update_user(recipient_id)
         return "Zostaleś zapisany"

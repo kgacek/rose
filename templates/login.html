@@ -89,12 +89,7 @@
 
     function statusChangeCallback(response) {
         console.log('statusChangeCallback');
-        if (response.status === 'not_authorized') {
-            document.getElementById('login_button').style.display = 'block';
-
-        } else {
-            document.getElementById('login_button').style.display = 'none';
-            document.getElementById('choice_buttons').style.display = 'block';
+        if (response.status === 'connected') {
             waitForGlobal(function () {
                 FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
 
@@ -111,13 +106,12 @@
                     });
                 });
             });
-        }
-    }
+        } else {
+            FB.login(function (response) {
+                console.log(response);
+            }, {scope: 'public_profile,groups_access_member_info'});
 
-    function checkLoginState() {
-        FB.getLoginStatus(function (response) {
-            statusChangeCallback(response);
-        });
+        }
     }
 
     window.extAsyncInit = function () {
@@ -178,16 +172,6 @@
     }(document, 'script', 'Messenger'));
 </script>
 
-<!--
-  Below we include the Login Button social plugin. This button uses
-  the JavaScript SDK to present a graphical Login button that triggers
-  the FB.login() function when clicked.
--->
-<div id="login_button" style="display: none;">
-    <fb:login-button size="xlarge" scope="public_profile,pages_messaging_subscriptions,groups_access_member_info"
-                     onlogin="checkLoginState();">
-    </fb:login-button>
-</div>
 <div id="choice_buttons" style="display: none;">
     <h3>Czy miałeś już przypisaną tajemnice?</h3>
     <a href="#" onclick="already_user()" class="myButton">TAK</a>

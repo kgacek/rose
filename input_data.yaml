@@ -37,8 +37,25 @@ intentions:
     "332757387257578"
   "Psałterz Różany":
     "642811842749838"
+  Róża różańcowa w intencji lepszego kodu:
+    "2400306070040832"
+  Róża różańcowa w intencji zaakceptowania aplikacji:
+    "390604118351798"
 
 roses:
+  "2400306070040832":
+    - "Benedykt Opat"
+    - "Bernard"
+    - "Cyryl i Metody"
+    - "Hildegarda"
+    - "Jacek"
+    - "Jan Bosko"
+  "390604118351798":
+    - "Józef"
+    - "Maksymilian Maria Kolbe"
+    - "Matka Boża Krolowa Polski"
+    - "Matka Boża z Montligeon"
+    - "Patryk"
   "866268920221787":
     - "Agnieszka z Montepulciano"
     - "Bazylii Wielki"
