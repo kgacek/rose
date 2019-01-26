@@ -1,17 +1,106 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
+    <title>Aplikacja Róża</title>
     <meta charset="UTF-8">
-    <title>Róża</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 </head>
 <body>
-<h2>Witaj na stronie aplikacji do R&oacute;ży r&oacute;żańca.</h2>
-<p><br /> Aplikacja jest ściśle powiązana z Facebookiem i Messangerem.</p>
-<p>Aby zacząć z niej korzystać, musisz wykonać następujące kroki:</p>
+<script type=text/javascript src="/static/js/jquery.js"></script>
+<script>
+
+    function genTable(data) {
+        var myTable = document.getElementById('divTable');
+        while (myTable.firstChild) {
+            myTable.removeChild(myTable.firstChild);
+        }
+        var row = document.createElement("OL");
+        for (var i = 0; i < data.length; i++) {
+            var cell = document.createElement("LI");
+            cell.innerText = data[i];
+            row.appendChild(cell);
+        }
+        myTable.appendChild(row);
+    }
+
+    function statusChangeCallback(response) {
+        console.log('statusChangeCallback');
+        if (response.status === 'connected') {
+
+            FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
+                if (response2 && !response2.error)
+                    var data_json = JSON.stringify([response2, ''], null, '\t');
+                console.log(data_json);
+                $.ajax({
+                    url: "https://kgacek.pythonanywhere.com/login",
+                    method: "post",
+                    contentType: 'application/json;charset=UTF-8',
+                    data: data_json
+                }).done(function (data) {
+                    if (data.length > 0) {
+                        document.getElementById('tableTitle').innerText = 'Jesteś zapisany do następujących Intencji:';
+                        document.getElementById('divTable').style.display = 'block';
+                        document.getElementById('divTable').style.display = 'block';
+                        genTable(data);
+                    } else {
+                        document.getElementById('tableTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji!';
+                    }
+                });
+            });
+
+        } else {
+            document.getElementById('tableTitle').innerText = 'Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.';
+            document.getElementById('divTable').style.display = 'none';
+        }
+    }
+
+    function loginbutton() {
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
+    }
+
+
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '1061023747434571',
+            cookie: true,  // enable cookies to allow the server to access
+                           // the session
+            xfbml: true,  // parse social plugins on this page
+            version: 'v3.2' // use graph api version 2.8
+        });
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
+
+    };
+    // Load the SDK asynchronously
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
+<div id="titleFont">Aplikacja do R&oacute;ż R&oacute;żańcowych</div>
+<hr>
+<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton()"></div>
+</li>
+<p>Witaj na stronie aplikacji do R&oacute;ży r&oacute;żańca.<br/>
+    Aplikacja jest ściśle powiązana z Facebookiem i Messangerem.<br>
+    Aby zacząć z niej korzystać, musisz wykonać następujące kroki:</p>
 <ol>
-<li>zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/">Strona Żywych R&oacute;ż R&oacute;żańca</a></li>
-<li>zapisz się do grupę/grupy z intencją w kt&oacute;rej chcesz odmawiać r&oacute;żaniec <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/">Dostępne grupy</a></li>
-<li>po dołączeniu do grupy, rozpocznij chat na <a href="https://www.messenger.com/t/tajemnicerozancaswietego">gł&oacute;wnej stronie</a></li>
+    <li>zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/" class="myButton">Strona Żywych R&oacute;ż R&oacute;żańca</a></li>
+    <li>zapisz się do grupy z intencją w kt&oacute;rej chcesz odmawiać r&oacute;żaniec <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/" class="myButton">Dostępne grupy</a></li>
+    <li>zaloguj się do aplikacji</li>
+
 </ol>
+<h4 id="tableTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h4>
+<div id="divTable" style="display: none;">
+
+
+</div>
 </body>
 </html>

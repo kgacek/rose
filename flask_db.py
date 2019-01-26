@@ -24,11 +24,13 @@ def update_user(user_id, status="NEW"):
 
 
 def add_user_intentions(user_id, group_list):
-    user = _get_user(user_id)
     group_dict = {el["id"]: el['name'] for el in group_list}
-    user.intentions = db.session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
-    db.session.commit()
-    return [intention.name for intention in user.intentions]
+    intentions = db.session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
+    if user_id:
+        user = _get_user(user_id)
+        user.intentions = intentions
+        db.session.commit()
+    return [intention.name for intention in intentions]
 
 
 def get_user_intentions(user_id):

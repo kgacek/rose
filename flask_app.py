@@ -57,7 +57,7 @@ def login():
         else:
             msg = "Nie jesteś w żadnej grupie różańcowej, najpierw dołącz do wybranej grupy"
         send_message(user_psid, msg)
-        return msg
+        return jsonify(intentions)
 
 
 # We will receive messages that Facebook sends our bot at this endpoint
@@ -111,7 +111,10 @@ def process_message(recipient_id, msg):
 
 # uses PyMessenger to send response to user
 def send_message(recipient_id, response):
-    # sends user the text message provided via input response parameter
-    _log("\nsending msg:\n'{0}' \nto '{1}'".format(response, recipient_id))
-    bot.send_text_message(recipient_id,  response)
-    return "success"
+    if recipient_id:
+        # sends user the text message provided via input response parameter
+        _log("\nsending msg:\n'{0}' \nto '{1}'".format(response, recipient_id))
+        bot.send_text_message(recipient_id,  response)
+        return "success"
+    else:
+        return "fail"
