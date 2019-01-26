@@ -21,29 +21,36 @@
 
     function genTable(data) {
         var myTable = document.getElementById('myTable');
-        var row = document.createElement("THEAD");
-        var cell = document.createElement("TD");
+        while (myTable.firstChild) {
+            myTable.removeChild(myTable.firstChild);
+        }
+        var row = document.createElement("TR");
+        var tbody = document.createElement("TBODY");
+        var thead = document.createElement("THEAD");
+        var cell = document.createElement("TH");
         cell.innerText = "patron";
         row.appendChild(cell);
         cell = document.createElement("INPUT");
-        cell.name="user_id";
+        cell.name="user_psid";
         cell.value=fb_user_psid;
         cell.style.display = 'none';
         row.appendChild(cell);
-        cell = document.createElement("TD");
+        cell = document.createElement("TH");
         cell.innerText = "nr taj.";
         row.appendChild(cell);
-        myTable.appendChild(row);
+        thead.appendChild(row);
         for (intention in data) {
             row = document.createElement("TR");
             cell = document.createElement("TD");
             cell.innerText = intention;
+            cell.colSpan = "2";
             row.appendChild(cell);
-            myTable.appendChild(row);
+            tbody.appendChild(row);
             row = document.createElement("TR")
 
             var select = document.createElement('select');
-            select.name=intention
+            select.name=intention;
+            select.style.width= '100%';
             for (rose in data[intention]) {
                 var option = document.createElement('option');
                 option.value = data[intention][rose];
@@ -64,24 +71,35 @@
             x.name=intention+"_mystery";
             cell.appendChild(x);
             row.appendChild(cell);
-            myTable.appendChild(row);
+            tbody.appendChild(row);
 
         }
+        myTable.appendChild(thead);
+        myTable.appendChild(tbody);
     }
 
     function already_user() {
         $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
-            user_id: fb_user_psid
+            user_psid: fb_user_psid
         }, function (data) {
-            document.getElementById('myForm').style.display = 'block';
-            genTable(data);
+            if (Object.keys(data).length > 0) {
+                document.getElementById('statusTitle').innerText = 'Wybierz Patrona i aktualnie odmawianą tajemnicę dla każdej róży w której uczestniczysz:';
+                document.getElementById('myForm').style.display = 'block';
+                genTable(data);
+            } else {
+                document.getElementById('statusTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji lub już wcześniej skonfigurowałeś swoje konto!';
+                setTimeout(function () {
+                    MessengerExtensions.requestCloseBrowser();
+                }, 3000);
+            }
+
         });
 
     }
 
     function new_user() {
         $.getJSON("https://kgacek.pythonanywhere.com/_set_user_status_to_verified", {
-            user_id: fb_user_psid
+            user_psid: fb_user_psid
         }, function () {
             MessengerExtensions.requestCloseBrowser();
         });
@@ -91,10 +109,11 @@
         console.log('statusChangeCallback');
         if (response.status === 'connected') {
             waitForGlobal(function () {
+                document.getElementById('statusTitle').innerText = 'Logowanie się powiodło';
+                document.getElementById('loginBtn').style.display = 'none';
                 FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
-
                     if (response2 && !response2.error)
-                        var data_json = JSON.stringify([response2, fb_user_psid], null, '\t');
+                        var data_json = JSON.stringify([response2, response.authResponse["userID"], fb_user_psid], null, '\t');
                     console.log(data_json);
                     $.ajax({
                         url: "https://kgacek.pythonanywhere.com/login",
@@ -107,11 +126,15 @@
                 });
             });
         } else {
-            FB.login(function (response) {
-                console.log(response);
-            }, {scope: 'public_profile,groups_access_member_info'});
-
+            document.getElementById('statusTitle').innerText = 'Zaloguj się do aplikacji, aby wczytać intencje do których należysz i ustawić aktualną tajemnicę.';
+            document.getElementById('loginBtn').style.display = 'block';
         }
+    }
+
+    function loginbutton() {
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
     }
 
     window.extAsyncInit = function () {
@@ -132,19 +155,6 @@
             xfbml: true,  // parse social plugins on this page
             version: 'v3.2' // use graph api version 2.8
         });
-
-        // Now that we've initialized the JavaScript SDK, we call
-        // FB.getLoginStatus().  This function gets the state of the
-        // person visiting this page and can return one of three states to
-        // the callback you provide.  They can be:
-        //
-        // 1. Logged into your app ('connected')
-        // 2. Logged into Facebook, but not your app ('not_authorized')
-        // 3. Not logged into Facebook and can't tell if they are logged into
-        //    your app or not.
-        //
-        // These three cases are handled in the callback function.
-
         FB.getLoginStatus(function (response) {
             statusChangeCallback(response);
         });
@@ -171,18 +181,19 @@
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'Messenger'));
 </script>
+<h4 id="statusTitle">Uruchamiam aplikację..</h4>
+<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton()" style="display: none;" id="loginBtn"></div>
 
+<form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
+<table id="myTable" class="iTable"></table> <br>
+  <input type="submit" value="Zapisz" class="myButton" style="float: right;"><br>
+</form>
+<hr>
 <div id="choice_buttons" style="display: none;">
-    <h3>Czy miałeś już przypisaną tajemnice?</h3>
+    <h4 id="statusTitle">Czy miałeś już przypisaną tajemnice?</h4>
     <a href="#" onclick="already_user()" class="myButton">TAK</a>
     <a href="#" onclick="new_user()" class="myButton">NIE</a>
 </div>
-
-<form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
-<table id="myTable" width="100%"></table>
-  <input type="submit" value="Submit">
-</form>
-
 
 </body>
 </html>

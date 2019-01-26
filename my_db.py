@@ -10,13 +10,13 @@ OFFSET = 12
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
 
-association_table_U_I = Table('association_u_i', Base.metadata, Column('users_id', String(50), ForeignKey('users.id')),
+association_table_U_I = Table('association_u_i', Base.metadata, Column('users_psid', String(50), ForeignKey('users.psid')),
                               Column('intentions_id', String(60), ForeignKey('intentions.id')))
 
 
 class AssociationUR(Base):
     __tablename__ = 'association_u_r'
-    user_id = Column(String(50), ForeignKey('users.id'), primary_key=True)
+    user_psid = Column(String(50), ForeignKey('users.psid'), primary_key=True)
     rose_id = Column(Integer, ForeignKey('roses.id'), primary_key=True)
     status = Column(String(50))
     rose = relationship('Rose', back_populates="users")
@@ -26,7 +26,8 @@ class AssociationUR(Base):
 
 class User(Base):
     __tablename__ = 'users'
-    id = Column(String(50), primary_key=True)
+    psid = Column(String(50), primary_key=True)
+    global_id = Column(String(50))
     status = Column(String(50))  # NEW, VERIFIED, ACTIVE, OBSOLETE
     intentions = relationship("Intention", secondary=association_table_U_I, back_populates="users")
     roses = relationship("AssociationUR", back_populates="user")
@@ -70,5 +71,5 @@ class Prayer(Base):
     id = Column(Integer, primary_key=True)
     ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
-    user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
+    user_psid = Column(String(50), ForeignKey('association_u_r.user_psid'))
     association = relationship("AssociationUR", back_populates="prayers")

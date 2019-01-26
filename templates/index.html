@@ -29,7 +29,7 @@
 
             FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
                 if (response2 && !response2.error)
-                    var data_json = JSON.stringify([response2, ''], null, '\t');
+                    var data_json = JSON.stringify([response2, response.authResponse["userID"], ''], null, '\t');
                 console.log(data_json);
                 $.ajax({
                     url: "https://kgacek.pythonanywhere.com/login",
@@ -39,7 +39,6 @@
                 }).done(function (data) {
                     if (data.length > 0) {
                         document.getElementById('tableTitle').innerText = 'Jesteś zapisany do następujących Intencji:';
-                        document.getElementById('divTable').style.display = 'block';
                         document.getElementById('divTable').style.display = 'block';
                         genTable(data);
                     } else {
@@ -86,21 +85,21 @@
 </script>
 <div id="titleFont">Aplikacja do R&oacute;ż R&oacute;żańcowych</div>
 <hr>
-<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton()"></div>
+<div id="div1" class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton()" data-scope="groups_access_member_info"></div>
 </li>
 <p>Witaj na stronie aplikacji do R&oacute;ży r&oacute;żańca.<br/>
     Aplikacja jest ściśle powiązana z Facebookiem i Messangerem.<br>
     Aby zacząć z niej korzystać, musisz wykonać następujące kroki:</p>
 <ol>
-    <li>zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/" class="myButton">Strona Żywych R&oacute;ż R&oacute;żańca</a></li>
-    <li>zapisz się do grupy z intencją w kt&oacute;rej chcesz odmawiać r&oacute;żaniec <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/" class="myButton">Dostępne grupy</a></li>
+    <li>zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/">Strona Żywych R&oacute;ż R&oacute;żańca</a></li>
+    <li>zapisz się do grupy z intencją w kt&oacute;rej chcesz odmawiać r&oacute;żaniec <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/">Dostępne grupy</a></li>
     <li>zaloguj się do aplikacji</li>
 
 </ol>
+<br>
+<hr>
 <h4 id="tableTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h4>
 <div id="divTable" style="display: none;">
-
-
 </div>
 </body>
 </html>

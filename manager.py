@@ -65,7 +65,7 @@ class Manager(object):
         for rose in expiring_roses:
             for association in rose.users:
                 if association.status == "ACTIVE":
-                    msg[association.user_id].append((rose.intention.name, rose.patron.name, rose.ends))
+                    msg[association.user_psid].append((rose.intention.name, rose.patron.name, rose.ends))
         return msg
 
     def switch_users(self):
@@ -98,8 +98,8 @@ class Manager(object):
 
     def get_unsubscribed_users(self):
         active_users = self.session.query(User).filter_by(status="ACTIVE").all()
-        expired_users = [user.id for user in active_users if len(user.roses) < len(user.intentions)]
-        unsubscibed_users = [user.id for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
+        expired_users = [user.psid for user in active_users if len(user.roses) < len(user.intentions)]
+        unsubscibed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
         return expired_users, unsubscibed_users
 
     def get_free_mystery(self, rose):
@@ -130,29 +130,29 @@ class Manager(object):
             user.status = "ACTIVE"
             self.session.commit()
 
-    def send_reminder(self, user_id, roses):
+    def send_reminder(self, user_psid, roses):
         msg = "Róże w których modlisz się w tym miesiącu:\n"
         for intention, patron, ends in roses:
             msg += "Intencja: {}; Patron: {}; kończy się: {}\n".format(intention, patron, str(ends))
         msg += "Jesli chcesz kontynuować modlitwę w przyszłym miesiacu, napisz/naciśnij 'potwierdzam'.\n "
         msg += "Jeśli nie chcesz więcej brać udziału w różach, napisz/naciśnij 'wypisz mnie'"
 
-        bot.send_text_message(user_id, msg)
+        bot.send_text_message(user_psid, msg)
 
     def send_notification_about_expired_users(self, expired, unsubscribed):
         msg = ''
-        for user_id in expired:
-            msg += bot.get_user_info(user_id)
-        for user_id in unsubscribed:
-            msg += bot.get_user_info(user_id)
+        for user_psid in expired:
+            msg += bot.get_user_info(user_psid)
+        for user_psid in unsubscribed:
+            msg += bot.get_user_info(user_psid)
         print(msg)
 
 
 def main():
     manager = Manager()
     users = manager.get_not_confirmed_users()
-    for user_id, roses in users.items():
-        manager.send_reminder(user_id, roses)
+    for user_psid, roses in users.items():
+        manager.send_reminder(user_psid, roses)
 
     manager.send_notification_about_expired_users(*manager.get_unsubscribed_users())
 

@@ -29,16 +29,16 @@ def index():
 
 @app.route('/_set_user_status_to_verified')
 def set_user_status_to_verified():
-    user_id = request.args.get('user_id')
-    flask_db.update_user(user_id, status="VERIFIED")
-    return 'success'
+    user_psid = request.args.get('user_psid')
+    flask_db.update_user(user_psid, status="VERIFIED")
+    return jsonify({'status': 'success'})
 
 
 @app.route('/_get_users_intentions', methods=['GET', 'POST'])
 def get_users_intentions():
     if request.method == 'GET':
-        user_id = request.args.get('user_id')
-        return jsonify(flask_db.get_user_intentions(user_id))
+        user_psid = request.args.get('user_psid')
+        return jsonify(flask_db.get_user_intentions(user_psid))
     else:
         data = request.form
         flask_db.set_user_roses(data)
@@ -50,8 +50,8 @@ def login():
     if request.method == 'GET':
         return render_template('login.html')
     else:
-        groups, user_psid = request.json
-        intentions = flask_db.add_user_intentions(user_psid, groups['data'])
+        groups, user_id, user_psid = request.json
+        intentions = flask_db.add_user_intentions(user_id, user_psid, groups['data'])
         if intentions:
             msg = "Jesteś zapisany do:\n" + '\n'.join(intentions)
         else:

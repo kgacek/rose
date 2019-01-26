@@ -73,43 +73,31 @@
 	top:1px;
 }
 
-
-
-
-table.blueTable {
-  border: 1px solid #1C6EA4;
-  background-color: #EEEEEE;
+table.iTable {
+  border: 1px solid #000000;
+  background-color: #FFFFFF;
   width: 100%;
   text-align: left;
-  border-collapse: collapse;
 }
-table.blueTable td, table.blueTable th {
-  border: 1px solid #AAAAAA;
-  padding: 3px 2px;
+table.iTable td, table.iTable th {
+  border: 1px solid #000000;
+  padding: 5px 2px;
 }
-table.blueTable tbody td {
+table.iTable tbody td {
   font-size: 13px;
 }
-table.blueTable tr:nth-child(even) {
-  background: #D0E4F5;
+table.iTable thead {
+  background: #005C94;
+  background: -moz-linear-gradient(top, #4085af 0%, #196c9e 66%, #005C94 100%);
+  background: -webkit-linear-gradient(top, #4085af 0%, #196c9e 66%, #005C94 100%);
+  background: linear-gradient(to bottom, #4085af 0%, #196c9e 66%, #005C94 100%);
 }
-table.blueTable thead {
-  background: #1C6EA4;
-  background: -moz-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
-  background: -webkit-linear-gradient(top, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
-  background: linear-gradient(to bottom, #5592bb 0%, #327cad 66%, #1C6EA4 100%);
-  border-bottom: 2px solid #444444;
-}
-table.blueTable thead th {
+table.iTable thead th {
   font-size: 15px;
   font-weight: bold;
-  color: #FFFFFF;
-  border-left: 2px solid #D0E4F5;
+  color: #F0F0F0;
+  text-align: center;
 }
-table.blueTable thead th:first-child {
-  border-left: none;
-}
-
 
 #titleFont {
 font-family: Georgia, serif;
