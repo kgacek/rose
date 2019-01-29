@@ -28,6 +28,7 @@ class User(Base):
     __tablename__ = 'users'
     psid = Column(String(50), primary_key=True)
     global_id = Column(String(50))
+    fullname = Column(String(50))
     status = Column(String(50))  # NEW, VERIFIED, ACTIVE, OBSOLETE
     intentions = relationship("Intention", secondary=association_table_U_I, back_populates="users")
     roses = relationship("AssociationUR", back_populates="user")

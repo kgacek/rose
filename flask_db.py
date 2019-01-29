@@ -27,11 +27,12 @@ def update_user(user_psid, status="NEW"):
         return True
 
 
-def connect_user_id(user_id, user_psid):
+def connect_user_id(user_id, user_psid, username):
     if user_psid:
         user = _get_user(user_psid)
         if user.global_id != user_id:
             user.global_id = user_id
+            user.fullname = username
             db.session.commit()
 
 
@@ -41,6 +42,8 @@ def get_all_intentions():
 
 def add_user_intention(data):
     user = _get_user(data['user_psid'])
+    if user.status == 'OBSOLETE':
+        user.status = 'VERIFIED'
     intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
     print('adding: ' + intention.name)
     if intention not in user.intentions:
@@ -60,34 +63,61 @@ def add_user_intentions(user_id, user_psid, group_list):
     return [intention.name for intention in intentions]
 
 
-def get_user_intentions(user_psid):
-    user = _get_user(user_psid)
+def get_user_intentions(user_psid, user_id):
+    if user_psid:
+        user = _get_user(user_psid)
+    else:
+        user = User(psid='uid'+user_id, global_id=user_id, status='NEW')
+        _user = db.session.query(User).filter(User.global_id == '').first()
+
     intentions = {}
+    already_assigned = {}
     for intention in user.intentions:
         intentions[intention.name] = []
         for rose in intention.roses:
             if rose.id in [rose.rose_id for rose in user.roses]:
                 del intentions[intention.name]
+                already_assigned[intention.name] = rose.patron.name
                 break
             intentions[intention.name].append(rose.patron.name)
-    return {'intentions': intentions, 'active': user.status != 'NEW'}
+    print(str(intentions))
+    print(str(already_assigned))
+    return {'intentions': intentions, 'active': user.status != 'NEW', 'already_assigned': already_assigned}
 
 
 def set_user_roses(data):
     user = _get_user(data['user_psid'])
     user.status = "ACTIVE"
-    user.roses = []
+    print(str(user.roses))
     for intention in user.intentions:
-        for rose in intention.roses:
-            if rose.patron.name == data[intention.name]:
-                asso = AssociationUR(status="ACTIVE")
-                asso.rose = rose
-                user.roses.append(asso)
-                prayer = Prayer(mystery_id=data[intention.name + '_mystery'], ends=rose.ends)
-                prayer.association = asso
-                db.session.add(prayer)
+        if intention.name in data:
+            for rose in intention.roses:
+                if rose.patron.name == data[intention.name]:
+                    asso = AssociationUR(status="ACTIVE")
+                    asso.rose = rose
+                    user.roses.append(asso)
+                    prayer = Prayer(mystery_id=data[intention.name + '_mystery'], ends=rose.ends)
+                    prayer.association = asso
+                    db.session.add(prayer)
     db.session.commit()
     return True
+
+
+def set_user_verified(data):
+    print("data: "+str(data))
+    users = db.session.query(User).filter(User.fullname.in_(data.keys())).all()
+    for user in users:
+        print(user.fullname)
+        user.status = 'VERIFIED'
+    db.session.commit()
+
+
+def get_new_users():
+    users = db.session.query(User).filter(User.status == 'NEW').all()
+    user_intentions = {}
+    for user in users:
+        user_intentions[user.fullname] = [intention.name for intention in user.intentions]
+    return user_intentions
 
 
 def subscribe_user(user_psid):
@@ -100,7 +130,8 @@ def subscribe_user(user_psid):
 
 def unsubscribe_user(user_psid):
     user = _get_user(user_psid)
-    user.roses = []
-    user.intentions = []
+    user.intentions.clear()
+    for asso in db.session.query(AssociationUR).filter_by(user_psid=user_psid).all():
+        db.session.delete(asso)
     user.status = "OBSOLETE"
     db.session.commit()

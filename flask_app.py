@@ -34,6 +34,16 @@ def set_user_status_to_verified():
     return jsonify({'status': 'success'})
 
 
+@app.route('/_new_users', methods=['GET', 'POST'])
+def get_new_users():
+    if request.method == 'GET':
+        return jsonify(flask_db.get_new_users())
+    else:
+        data = request.form
+        flask_db.set_user_verified(data)
+        return render_template('index.html')
+
+
 @app.route('/_add_intention', methods=['GET', 'POST'])
 def add_intention():
     print('adding intention')
@@ -48,7 +58,8 @@ def get_all_intentions():
     user_psid = request.args.get('user_psid')
     user_id = request.args.get('user_id')
     if user_psid and user_id:
-        flask_db.connect_user_id(user_id, user_psid)
+        username = bot.get_user_info(user_id)['name']
+        flask_db.connect_user_id(user_id, user_psid, username)
     return jsonify(flask_db.get_all_intentions())
 
 
@@ -56,7 +67,8 @@ def get_all_intentions():
 def get_users_intentions():
     if request.method == 'GET':
         user_psid = request.args.get('user_psid')
-        return jsonify(flask_db.get_user_intentions(user_psid))
+        user_id = request.args.get('user_id')
+        return jsonify(flask_db.get_user_intentions(user_psid, user_id))
     else:
         data = request.form
         flask_db.set_user_roses(data)
@@ -111,20 +123,19 @@ def verify_fb_token(token_sent):
 
 
 def process_message(recipient_id, msg):
-    if "we have new user" in msg:
-        return "Witaj w Aplikacji Róż Różańca. Wybierz 'pobierz grupy' z menu aby się zapisać."
-    if "zapisz" in msg:
-        flask_db.update_user(recipient_id)
-        return "Zostaleś zapisany"
-    elif "wypisz" in msg:
-        flask_db.unsubscribe_user(recipient_id)
-        return "Zostaleś wypisany."
-    elif "potwierdzam" == msg:
-        flask_db.subscribe_user(recipient_id)
-        return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
-
-    else:
-        return "Nie rozumiem"
+    try:
+        if "we have new user" in msg:
+            return "Witaj w Aplikacji Róż Różańca. Wybierz 'pobierz grupy' z menu aby się zapisać."
+        elif "wypisz" in msg:
+            flask_db.unsubscribe_user(recipient_id)
+            return "Zostaleś wypisany."
+        elif "potwierdzam" == msg:
+            flask_db.subscribe_user(recipient_id)
+            return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
+        else:
+            return "Nie rozumiem"
+    except:
+        return "coś poszlo nie tak"
 
 
 # uses PyMessenger to send response to user

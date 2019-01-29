@@ -105,8 +105,16 @@ function already_user() {
             document.getElementById('statusTitle').innerText = 'Wybierz Patrona i aktualnie odmawianą tajemnicę dla każdej róży w której uczestniczysz:';
             document.getElementById('myForm').style.display = 'block';
             genTable(data['intentions']);
-        } else {
-            document.getElementById('statusTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji lub już wcześniej skonfigurowałeś swoje konto!';
+        }
+        else if (Object.keys(data['already_assigned']).length > 0) {
+            document.getElementById('statusTitle').innerText = 'Masz już przypisane tajemnice dla wszystkich Intencji w których się modlisz.';
+            setTimeout(function () {
+                MessengerExtensions.requestCloseBrowser();
+            }, 8000);
+
+        }
+        else{
+            document.getElementById('statusTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji.';
             setTimeout(function () {
                 MessengerExtensions.requestCloseBrowser();
             }, 3000);
@@ -155,46 +163,91 @@ function loginbutton2() {
         statusChangeCallback2(response);
     });
 }
-function genIntentionList(data) {
+function genUsersList(data) {
+    var div = document.getElementById('divUsersList');
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
+    var uOl = document.createElement("OL");
+    for (var user in data) {
+        var li = document.createElement("LI");
+        var input = document.createElement("INPUT");
+        input.name = user;
+        input.value = user;
+        input.type = 'checkbox';
+        li.appendChild(input);
+        var label = document.createElement("LABEL");
+        label.innerText = user;
+        li.appendChild(label);
+        uOl.appendChild(li);
+
+        var iOl = document.createElement("OL");
+        for (var i=0;i<data[user].length;i++){
+            li = document.createElement("LI");
+            li.innerText = data[user][i];
+            iOl.appendChild(li);
+        }
+        uOl.appendChild(iOl);
+    }
+    div.appendChild(uOl);
+}
+
+function genIntentionList(approved, pending) {
     var myTable = document.getElementById('divTable');
     while (myTable.firstChild) {
         myTable.removeChild(myTable.firstChild);
     }
     var row = document.createElement("OL");
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < approved.length; i++) {
         var cell = document.createElement("LI");
-        cell.innerText = data[i];
+        cell.innerText = approved[i];
+        console.log(approved[i]);
+        row.appendChild(cell);
+    }
+    for (var i = 0; i < pending.length; i++) {
+        cell = document.createElement("LI");
+        cell.innerText = pending[i];
         row.appendChild(cell);
     }
     myTable.appendChild(row);
 }
 
+function showStatus(user_id) {
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
+        user_id: user_id
+    }, function (data) {
+        if (!data['active']) {
+            document.getElementById('statusTitle').innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, cierpliwości!';
+        } else if (Object.keys(data['already_assigned']).length > 0 || Object.keys(data['intentions']).length > 0) {
+
+            document.getElementById('statusTitle').innerText = 'Aktualnie Jesteś zapisany do:';
+            document.getElementById('divTable').style.display = 'block';
+            genIntentionList(Object.keys(data['already_assigned']), Object.keys(data['intentions']));
+        } else {
+            document.getElementById('statusTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji.';
+        }
+
+    });
+}
+
 function statusChangeCallback2(response) {
     console.log('statusChangeCallback');
     if (response.status === 'connected') {
+        if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
+            $.getJSON("https://kgacek.pythonanywhere.com/_new_users",
+                function (data) {
+                    if (Object.keys(data).length > 0) {
+                        document.getElementById('statusTitle').innerText = 'Jesteś Administratorem. Aktualnie oczekujący użytkownicy:';
+                        document.getElementById('usersList').style.display = 'block';
+                        genUsersList(data)
+                    } else {
+                        document.getElementById('statusTitle').innerText = 'Jesteś Administratorem. Brak oczekujących użytkowników.';
+                        document.getElementById('usersList').style.display = 'none';
 
-        FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
-            if (response2 && !response2.error)
-                var data_json = JSON.stringify([response2, response.authResponse["userID"], ''], null, '\t');
-            console.log(data_json);
-            $.ajax({
-                url: "https://kgacek.pythonanywhere.com/login",
-                method: "post",
-                contentType: 'application/json;charset=UTF-8',
-                data: data_json
-            }).done(function (data) {
-                if (data.length > 0) {
-                    document.getElementById('tableTitle').innerText = 'Jesteś zapisany do następujących Intencji:';
-                    document.getElementById('divTable').style.display = 'block';
-                    genIntentionList(data);
-                } else {
-                    document.getElementById('tableTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji!';
-                }
-            });
-        });
-
-    } else {
-        document.getElementById('tableTitle').innerText = 'Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.';
-        document.getElementById('divTable').style.display = 'none';
+                    }
+                });
+        } else {
+            showStatus(response.authResponse["userID"]);
+        }
     }
 }

@@ -34,7 +34,7 @@ window.fbAsyncInit = function () {
 </script>
 <div id="titleFont">Aplikacja do R&oacute;ż R&oacute;żańcowych</div>
 <hr>
-<div id="div1" class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton2()" data-scope="groups_access_member_info"></div>
+<div id="div1" class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton2()"></div>
 </li>
 <p>Witaj na stronie aplikacji do R&oacute;ży r&oacute;żańca.<br/>
     Aplikacja jest ściśle powiązana z Facebookiem i Messangerem.<br>
@@ -47,8 +47,11 @@ window.fbAsyncInit = function () {
 </ol>
 <br>
 <hr>
-<h4 id="tableTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h4>
-<div id="divTable" style="display: none;">
-</div>
+<h4 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h4>
+<div id="divTable" style='display: none'></div>
+<form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
+    <div id="divUsersList"></div><br>
+  <input type="submit" value="zaakceptuj" class="myButton" style="float: right;"><br>
+</form>
 </body>
 </html>
