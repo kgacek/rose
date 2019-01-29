@@ -27,6 +27,28 @@ def update_user(user_psid, status="NEW"):
         return True
 
 
+def connect_user_id(user_id, user_psid):
+    if user_psid:
+        user = _get_user(user_psid)
+        if user.global_id != user_id:
+            user.global_id = user_id
+            db.session.commit()
+
+
+def get_all_intentions():
+    return [intention.name for intention in db.session.query(Intention).all()]
+
+
+def add_user_intention(data):
+    user = _get_user(data['user_psid'])
+    intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
+    print('adding: ' + intention.name)
+    if intention not in user.intentions:
+        user.intentions.append(intention)
+    db.session.commit()
+    return [intention.name for intention in user.intentions]
+
+
 def add_user_intentions(user_id, user_psid, group_list):
     group_dict = {el["id"]: el['name'] for el in group_list}
     intentions = db.session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
@@ -48,7 +70,7 @@ def get_user_intentions(user_psid):
                 del intentions[intention.name]
                 break
             intentions[intention.name].append(rose.patron.name)
-    return intentions
+    return {'intentions': intentions, 'active': user.status != 'NEW'}
 
 
 def set_user_roses(data):

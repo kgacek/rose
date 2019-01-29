@@ -34,6 +34,24 @@ def set_user_status_to_verified():
     return jsonify({'status': 'success'})
 
 
+@app.route('/_add_intention', methods=['GET', 'POST'])
+def add_intention():
+    print('adding intention')
+    data = request.form
+    print(str(data))
+    flask_db.add_user_intention(data)
+    return render_template('login.html')
+
+
+@app.route('/_get_all_intentions')
+def get_all_intentions():
+    user_psid = request.args.get('user_psid')
+    user_id = request.args.get('user_id')
+    if user_psid and user_id:
+        flask_db.connect_user_id(user_id, user_psid)
+    return jsonify(flask_db.get_all_intentions())
+
+
 @app.route('/_get_users_intentions', methods=['GET', 'POST'])
 def get_users_intentions():
     if request.method == 'GET':
