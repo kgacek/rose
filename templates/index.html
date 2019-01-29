@@ -7,60 +7,9 @@
 </head>
 <body>
 <script type=text/javascript src="/static/js/jquery.js"></script>
+<script type=text/javascript src="/static/js/rose_scripts.js"></script>
 <script>
-
-    function genTable(data) {
-        var myTable = document.getElementById('divTable');
-        while (myTable.firstChild) {
-            myTable.removeChild(myTable.firstChild);
-        }
-        var row = document.createElement("OL");
-        for (var i = 0; i < data.length; i++) {
-            var cell = document.createElement("LI");
-            cell.innerText = data[i];
-            row.appendChild(cell);
-        }
-        myTable.appendChild(row);
-    }
-
-    function statusChangeCallback(response) {
-        console.log('statusChangeCallback');
-        if (response.status === 'connected') {
-
-            FB.api("/" + response.authResponse["userID"] + "/groups", {access_token: response.authResponse["accessToken"]}, function (response2) {
-                if (response2 && !response2.error)
-                    var data_json = JSON.stringify([response2, response.authResponse["userID"], ''], null, '\t');
-                console.log(data_json);
-                $.ajax({
-                    url: "https://kgacek.pythonanywhere.com/login",
-                    method: "post",
-                    contentType: 'application/json;charset=UTF-8',
-                    data: data_json
-                }).done(function (data) {
-                    if (data.length > 0) {
-                        document.getElementById('tableTitle').innerText = 'Jesteś zapisany do następujących Intencji:';
-                        document.getElementById('divTable').style.display = 'block';
-                        genTable(data);
-                    } else {
-                        document.getElementById('tableTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji!';
-                    }
-                });
-            });
-
-        } else {
-            document.getElementById('tableTitle').innerText = 'Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.';
-            document.getElementById('divTable').style.display = 'none';
-        }
-    }
-
-    function loginbutton() {
-        FB.getLoginStatus(function (response) {
-            statusChangeCallback(response);
-        });
-    }
-
-
-    window.fbAsyncInit = function () {
+window.fbAsyncInit = function () {
         FB.init({
             appId: '1061023747434571',
             cookie: true,  // enable cookies to allow the server to access
@@ -69,7 +18,7 @@
             version: 'v3.2' // use graph api version 2.8
         });
         FB.getLoginStatus(function (response) {
-            statusChangeCallback(response);
+            statusChangeCallback2(response);
         });
 
     };
