@@ -28,7 +28,7 @@ def fill_db():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     session = Session()
-    with open('input_data.yaml') as f:
+    with open('input_test.yaml') as f:
         in_data = yaml.load(f)
 
     # add intentions
