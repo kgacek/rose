@@ -41,7 +41,7 @@ def fill_db():
             pat = Patron(name=patron)
             rose = Rose(intention_id=intention,
                         started=date.today().replace(day=1),
-                        ends=date.today().replace(day=1) + relativedelta(months=1),
+                        ends=date.today(),
                         patron=pat)
             session.add(rose)
 
