@@ -3,13 +3,28 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
+import yaml
 
-from my_db import metadata, User, Intention, Prayer, AssociationUR, OFFSET
+from my_db import metadata, User, Intention, Prayer, AssociationUR
+
+"""
+Module for handling DB related tasks in flask application
+"""
+
+with open('config.yaml') as f:
+    CONFIG = yaml.load(f)
 
 db = SQLAlchemy(metadata=metadata)
 
 
+def _log(msg):
+    with open(CONFIG['log']['flask_db'], 'a+') as log:
+        log.write(str(msg))
+
+
 def _get_user(user_psid, create=True, status="NEW"):
+    """Gets user db object for given user_psid. creates it if don't exist yet.
+    :return User object"""
     user = db.session.query(User).filter_by(psid=user_psid).first()
     if not user and create:
         user = User(psid=user_psid, status=status)
@@ -17,17 +32,9 @@ def _get_user(user_psid, create=True, status="NEW"):
     return user
 
 
-def update_user(user_psid, status="NEW"):
-    user = _get_user(user_psid)
-    if status == "VERIFIED" and user.status != "NEW":
-        return False
-    else:
-        user.status = status
-        db.session.commit()
-        return True
-
-
 def connect_user_id(user_id, user_psid, username):
+    """connects user IDs. invokes when user will start adding intentions via webview in messenger.
+    Additionally, fullname is updated."""
     if user_psid:
         user = _get_user(user_psid)
         if user.global_id != user_id:
@@ -37,10 +44,17 @@ def connect_user_id(user_id, user_psid, username):
 
 
 def get_all_intentions():
+    """Gets all intentions
+    :return list of all intentions"""
     return [intention.name for intention in db.session.query(Intention).all()]
 
 
 def add_user_intention(data):
+    """Adds user intention.
+    STATUS CHANGE: If user had 'OBSOLETE' status before, after that it gets 'VERIFIED"
+    :param data: dict, {user_psid: <str>, intention_name: <str>}
+    :return list of user intentions
+    """
     user = _get_user(data['user_psid'])
     if user.status == 'OBSOLETE':
         user.status = 'VERIFIED'
@@ -52,23 +66,19 @@ def add_user_intention(data):
     return [intention.name for intention in user.intentions]
 
 
-def add_user_intentions(user_id, user_psid, group_list):
-    group_dict = {el["id"]: el['name'] for el in group_list}
-    intentions = db.session.query(Intention).filter(Intention.id.in_(group_dict.keys())).all()
-    if user_psid:
-        user = _get_user(user_psid)
-        user.intentions = intentions
-        user.global_id = user_id
-        db.session.commit()
-    return [intention.name for intention in intentions]
-
-
 def get_user_intentions(user_psid, user_id):
+    """Gets all user intentions. User can be identified with both app and page scoped ID
+    :param user_psid: User psid
+    :param user_id: User.global_id
+    :return dict, {'intentions': <dict>, 'active': <bool>, 'already_assigned': <dict>}
+                    active - true when user.status != 'NEW'
+                    intentions - {intention_name: [list of  all rose_ids]} only for intentions where user is not yet.
+                    already_assigned - {intention_name: assigned rose}
+                    intentions + already_assingned = all intentions"""
     if user_psid:
         user = _get_user(user_psid)
     else:
-        user = User(psid='uid'+user_id, global_id=user_id, status='NEW')
-        _user = db.session.query(User).filter(User.global_id == '').first()
+        user = db.session.query(User).filter(User.global_id == user_id).first()
 
     intentions = {}
     already_assigned = {}
@@ -86,6 +96,8 @@ def get_user_intentions(user_psid, user_id):
 
 
 def set_user_roses(data):
+    """Sets user roses basing on input data.
+    :param data: dict, {user_psid: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_id}"""
     user = _get_user(data['user_psid'])
     user.status = "ACTIVE"
     print(str(user.roses))
@@ -104,6 +116,10 @@ def set_user_roses(data):
 
 
 def set_user_verified(data):
+    """Sets users status to VERIFIED, basing on input list  of users.
+    STATUS CHANGE: after that user status will be'VERIFIED'. used when Admin approves user
+    :param data: {user.fullname:..,user2.fullname:.., ...}
+    """
     print("data: "+str(data))
     users = db.session.query(User).filter(User.fullname.in_(data.keys())).all()
     for user in users:
@@ -113,6 +129,8 @@ def set_user_verified(data):
 
 
 def get_new_users():
+    """Gets all users with status == NEW. Admin requests that to get list of users to approve
+    :return dict. {username: [list of requested intention to approve]}"""
     users = db.session.query(User).filter(User.status == 'NEW').all()
     user_intentions = {}
     for user in users:
@@ -121,14 +139,23 @@ def get_new_users():
 
 
 def subscribe_user(user_psid):
-    user_asso = db.session.query(AssociationUR).filter_by(user_psid=user_psid).all()
-    expiring_association = [asso for asso in user_asso if asso.rose.ends < timedelta(days=OFFSET) + date.today()]
+    """Sets  User-Rose relation status to subscibed. should be invoked after user confirmation on messenger.
+    STATUS CHANGE: UR asso for roses which ends soon, will be changed from ACTIVE to SUBSCRIBED.
+    Affects only roses which have ACTIVE status. EXPIRED asso wont be changed"""
+    user_asso = db.session.query(AssociationUR).filter_by(user_psid=user_psid).filter_by(status='ACTIVE').all()
+    expiring_association = [asso for asso in user_asso if
+                            asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()]
     for association in expiring_association:
         association.status = 'SUBSCRIBED'
     db.session.commit()
 
 
 def unsubscribe_user(user_psid):
+    """Unsubscribe User from all activities (on user demand).
+    STATUS CHANGE: User status will be set to OBSOLETE.
+    User Intentions and user roses list will be cleared.
+    User Can subscribe again to any intentions he want, bot no confirmation from admins will be needed in this case.
+    """
     user = _get_user(user_psid)
     user.intentions.clear()
     for asso in db.session.query(AssociationUR).filter_by(user_psid=user_psid).all():

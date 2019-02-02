@@ -11,22 +11,21 @@ from collections import defaultdict
 
 from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR, OFFSET
 
-ACCESS_TOKEN = 'EAAPEZCteQaEsBAKNZBZCT9s9sDPUnsIzYTKGTmUE4ZAGdPiQwi0jBWAnZB2aiDdg6z08ZAGPJrggrwAqr1oJEtKr8J3UphXMK5rlFmUgjZAyOIAsY5B8MrW0bjFw0JjoV64hpOnsPQNQRtI7i92tiqTBf5ZBXlAMGc7KeHiFaZBlUJZChkfcSHSmO1'
-ACCESS_TOKEN2 = 'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
-bot = Bot(ACCESS_TOKEN)
+"""
+Module for handling actions  which should be invoked outside Flask - periodic tasks, DB setup etc.
+"""
 
-engine = create_engine("mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8",
-                       pool_recycle=280,
-                       pool_size=3,
-                       max_overflow=0,
-                       echo=True)
+with open('config.yaml') as f:
+    CONFIG = yaml.load(f)
 
+bot = Bot(CONFIG['token']['test'])
+engine = create_engine(CONFIG['sql']['rose']['full_address'], pool_recycle=280, pool_size=3, max_overflow=0, echo=True)
 Session = sessionmaker(bind=engine)
 
 
 def _log(msg):
-    with open('/home/kgacek/fb_bot/manager.log', 'a+') as f:
-        f.write(str(msg))
+    with open(CONFIG['log']['manager'], 'a+') as log:
+        log.write(str(msg))
 
 
 def fill_db():
@@ -34,8 +33,8 @@ def fill_db():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     session = Session()
-    with open('input_data.yaml') as f:
-        in_data = yaml.load(f)
+    with open(CONFIG['inputs']['main']) as yaml_file:
+        in_data = yaml.load(yaml_file)
 
     # add intentions
     for el in in_data['intentions']:
@@ -65,7 +64,9 @@ class Manager(object):
     def __init__(self):
         self.session = Session()
 
-    def get_not_confirmed_users(self):  # all user-rose pair with'ACTIVE' status <offset> days before end
+    def get_not_confirmed_users(self):
+        """Gets all user-rose pair with'ACTIVE' status <offset> days before rose.ends
+        :return dict {user_psid: (intention name, patron name, rose.ends date)}"""
         _log("getting not confirmed users..")
         expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=OFFSET) + date.today()).all()
         msg = defaultdict(list)
@@ -77,6 +78,8 @@ class Manager(object):
         return msg
 
     def switch_users(self):
+        """Assigns new prayers to users who subscribed, and marks UR asso as EXPIRED for those who don't"""
+        # ToDo fix return value or remove it if not necessary
         _log("switching useres to next mysteries..")
         expired_roses = self.session.query(Rose).filter(Rose.ends == date.today()).all()
         msg = {}
@@ -89,12 +92,24 @@ class Manager(object):
                     new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1, ends=rose.ends)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
-                    self.session.delete(association)
+                    association.status = "EXPIRED"
         self.session.commit()
         _log(msg)
         return msg
 
+    def get_unsubscribed_users(self):
+        """Gets users who not subscribed for next month in at least one rose or signed out manually
+        :return two tuples with user.psid for expired and unsubscribed users"""
+        _log('getting unsubscribed users..')
+        expired_users = set(el.user_psid for el in self.session.query(AssociationUR).filter_by(status="EXPIRED").all())
+        unsubscribed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
+        _log('expired: {}\n unsubscribed: {}'.format(str(expired_users), str(unsubscribed_users)))
+        return tuple(expired_users), tuple(unsubscribed_users)
+
     def create_new_rose(self, user, intention):
+        """Creates new Rose  in <intention>, and adds <user> to it.
+        :param user:  User object
+        :param intention: Intention object"""
         _log('creating new rose..')
         patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
         _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
@@ -108,16 +123,10 @@ class Manager(object):
         asso.prayers.append(new)
         user.roses.append(asso)
 
-    def get_unsubscribed_users(self):
-        _log('getting unsubscribed users..')
-        active_users = self.session.query(User).filter_by(status="ACTIVE").all()
-        expired_users = [user.psid for user in active_users if len(user.roses) < len(user.intentions)]
-
-        unsubscibed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
-        _log('expired: {}\n unsubscribed: {}'.format(str(expired_users), str(unsubscibed_users)))
-        return expired_users, unsubscibed_users
-
-    def get_free_mystery(self, rose):
+    @staticmethod
+    def get_free_mystery(rose):
+        """Gets first free mystery in given rose
+        :return number [0,20] 0 when all mysteries are used"""
         _log("getting first free mystery in rose : {}".format(rose.patron.name))
         current_mysteries = []
         for asso in rose.users:
@@ -131,16 +140,22 @@ class Manager(object):
         return 0
 
     def attach_new_users_to_roses(self):
+        """Attaching new users and users which have more intentions than roses to free mystery. In case of lack of free
+        mysteries in current available Roses, new Rose is created."""
         _log('adding new users to roses')
-        verified_users = self.session.query(User).filter_by(status="VERIFIED").all()
-        for user in verified_users:
+        active_users = self.session.query(User).filter_by(status="ACTIVE").all()
+        free_users = self.session.query(User).filter_by(status="VERIFIED").all()
+        #  ToDo maybe there is a better way to find people who dont have roses assigned for all intentions
+        free_users.extend([user.psid for user in active_users if len(user.roses) < len(user.intentions)])
+        self.session.query()
+        for user in free_users:
             for intention in user.intentions:
                 roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
-                filtered_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
-                if filtered_roses:
+                not_full_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
+                if not_full_roses:
                     asso = AssociationUR(status="ACTIVE")
-                    asso.rose = filtered_roses[0]
-                    new = Prayer(mystery_id=self.get_free_mystery(filtered_roses[0]), ends=filtered_roses[0].ends)
+                    asso.rose = not_full_roses[0]
+                    new = Prayer(mystery_id=self.get_free_mystery(not_full_roses[0]), ends=not_full_roses[0].ends)
                     asso.prayers.append(new)
                     user.roses.append(asso)
                 else:
@@ -148,7 +163,8 @@ class Manager(object):
             user.status = "ACTIVE"
             self.session.commit()
 
-    def send_reminder(self, user_psid, roses):
+    @staticmethod
+    def send_reminder(user_psid, roses):
         msg = "Róże w których modlisz się w tym miesiącu:\n"
         for intention, patron, ends in roses:
             msg += "Intencja: {}; Patron: {}; kończy się: {}\n".format(intention, patron, str(ends))
@@ -157,7 +173,8 @@ class Manager(object):
         _log('sending msg: {}\nto: {}'.format(msg, user_psid))
         bot.send_text_message(user_psid, msg)
 
-    def send_notification_about_expired_users(self, expired, unsubscribed):
+    @staticmethod
+    def send_notification_about_expired_users(expired, unsubscribed):
         msg = ''
         for user_psid in expired:
             msg += str(bot.get_user_info(user_psid))
