@@ -1,0 +1,29 @@
+token:
+  main:
+    'EAAPEZCteQaEsBAKNZBZCT9s9sDPUnsIzYTKGTmUE4ZAGdPiQwi0jBWAnZB2aiDdg6z08ZAGPJrggrwAqr1oJEtKr8J3UphXMK5rlFmUgjZAyOIAsY5B8MrW0bjFw0JjoV64hpOnsPQNQRtI7i92tiqTBf5ZBXlAMGc7KeHiFaZBlUJZChkfcSHSmO1'
+  test:
+    'EAAPEZCteQaEsBADHKZAFyVjN4RqXctdGoZAQKVC7Olc7uh3OsGHToFBAm2gpJRZAgZAJaLZAstLeVm7ldL0pcG4drZCAPd8B287ykBVF87axOm3EbUZCjUZCcSyaAfzVOXqZB32l13byySABBVfC12gfw2IGTZCcPz1wZAwB0ug3Ft5dfdDxvKVGZB3U6'
+  verify_webhook:
+    'TESTINGTOKEN'
+app_id:
+  '1061023747434571'
+admins: # should be list of admins or move this somewhere else (db?)
+  '2648811858479034'
+sql:
+  rose:
+    full_address:
+      "mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
+log:
+  manager:
+    '~/app_logs/manager.log'
+  flask_app:
+    '~/app_logs/flask_app.log'
+  flask_db:
+    '~/app_logs/flask_db.log'
+inputs:
+  main:
+    'input_data.yaml'
+  test:
+    'input_test.yaml'
+reminder_offset:
+  3
