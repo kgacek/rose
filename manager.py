@@ -24,7 +24,13 @@ engine = create_engine("mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-se
 Session = sessionmaker(bind=engine)
 
 
+def _log(msg):
+    with open('/home/kgacek/fb_bot/manager.log', 'a+') as f:
+        f.write(str(msg))
+
+
 def fill_db():
+    _log("fill_db()")
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     session = Session()
@@ -60,15 +66,18 @@ class Manager(object):
         self.session = Session()
 
     def get_not_confirmed_users(self):  # all user-rose pair with'ACTIVE' status <offset> days before end
+        _log("getting not confirmed users..")
         expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=OFFSET) + date.today()).all()
         msg = defaultdict(list)
         for rose in expiring_roses:
             for association in rose.users:
                 if association.status == "ACTIVE":
                     msg[association.user_psid].append((rose.intention.name, rose.patron.name, rose.ends))
+        _log(msg)
         return msg
 
     def switch_users(self):
+        _log("switching useres to next mysteries..")
         expired_roses = self.session.query(Rose).filter(Rose.ends == date.today()).all()
         msg = {}
         for rose in expired_roses:
@@ -80,12 +89,15 @@ class Manager(object):
                     new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1, ends=rose.ends)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
-                    self.session.delete(association)
+                    association.status = "EXPIRED"
         self.session.commit()
+        _log(msg)
         return msg
 
     def create_new_rose(self, user, intention):
-        patron = self.session.query(Patron).filter(Patron.rose == None).first()
+        _log('creating new rose..')
+        patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
+        _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
                     started=date.today(),
                     ends=date.today() + relativedelta(months=1),
@@ -97,12 +109,17 @@ class Manager(object):
         user.roses.append(asso)
 
     def get_unsubscribed_users(self):
+        _log('getting unsubscribed users..')
         active_users = self.session.query(User).filter_by(status="ACTIVE").all()
+        expired_users = [user.psid for user in ] # todo handle new associoation status
         expired_users = [user.psid for user in active_users if len(user.roses) < len(user.intentions)]
+
         unsubscibed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
+        _log('expired: {}\n unsubscribed: {}'.format(str(expired_users), str(unsubscibed_users)))
         return expired_users, unsubscibed_users
 
     def get_free_mystery(self, rose):
+        _log("getting first free mystery in rose : {}".format(rose.patron.name))
         current_mysteries = []
         for asso in rose.users:
             for prayer in asso.prayers:
@@ -110,10 +127,12 @@ class Manager(object):
                     current_mysteries.append(prayer.mystery_id)
         for i in range(1, 21):
             if i not in current_mysteries:
+                _log("mystery nr: {}".format(str(i)))
                 return i
         return 0
 
     def attach_new_users_to_roses(self):
+        _log('adding new users to roses')
         verified_users = self.session.query(User).filter_by(status="VERIFIED").all()
         for user in verified_users:
             for intention in user.intentions:
@@ -136,16 +155,16 @@ class Manager(object):
             msg += "Intencja: {}; Patron: {}; kończy się: {}\n".format(intention, patron, str(ends))
         msg += "Jesli chcesz kontynuować modlitwę w przyszłym miesiacu, napisz/naciśnij 'potwierdzam'.\n "
         msg += "Jeśli nie chcesz więcej brać udziału w różach, napisz/naciśnij 'wypisz mnie'"
-
+        _log('sending msg: {}\nto: {}'.format(msg, user_psid))
         bot.send_text_message(user_psid, msg)
 
     def send_notification_about_expired_users(self, expired, unsubscribed):
         msg = ''
         for user_psid in expired:
-            msg += bot.get_user_info(user_psid)
+            msg += str(bot.get_user_info(user_psid))
         for user_psid in unsubscribed:
-            msg += bot.get_user_info(user_psid)
-        print(msg)
+            msg += str(bot.get_user_info(user_psid))
+        _log("sending notification about expired users:\n {}".format(msg))  # todo implement real sending
 
 
 def main():
