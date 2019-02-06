@@ -32,26 +32,36 @@ window.fbAsyncInit = function () {
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
 </script>
-<div id="titleFont">Aplikacja do R&oacute;ż R&oacute;żańcowych</div>
-<hr>
-<div id="div1" class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton2()"></div>
-</li>
-<p>Witaj na stronie aplikacji do R&oacute;ży r&oacute;żańca.<br/>
-    Aplikacja jest ściśle powiązana z Facebookiem i Messangerem.<br>
-    Aby zacząć z niej korzystać, musisz wykonać następujące kroki:</p>
-<ol>
-    <li>zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/">Strona Żywych R&oacute;ż R&oacute;żańca</a></li>
-    <li>zapisz się do grupy z intencją w kt&oacute;rej chcesz odmawiać r&oacute;żaniec <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/">Dostępne grupy</a></li>
-    <li>zaloguj się do aplikacji</li>
-
-</ol>
-<br>
-<hr>
-<h4 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h4>
-<div id="divTable" style='display: none'></div>
-<form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
-    <div id="divUsersList"></div><br>
-  <input type="submit" value="zaakceptuj" class="myButton" style="float: right;"><br>
-</form>
+<div id="bar" class="bar">
+    <div class="fb-login-button logbar" data-size="small" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton2()"></div>
+</div>
+<div class="title bar">Aplikacja do Róż Różańcowych</div>
+<div id="decription" class="desc bar">
+    <h4>Kim jesteśmy?</h4>
+    <p>Jesteśmy rozkochanymi czcicielami Jezusa Zmartwychwstałego, którzy przez jego najdroższą Mamusię - Maryję powierzają codzienne swoje sprawy i problemy, modląc się każdego dnia modlitwą
+        Różańcową.</p>
+    <h4>Czym są Żywe Róże Różańca Świętego?</h4>
+    <p>Każda Róża jest modlitewną wspólnotą 20 osób, z których każda codziennie we własnym zakresie odmawia jedną dziesiątkę różańca (jedną tajemnicę). Każda osoba przez miesiąc rozważa jedną,
+        przydzieloną jej Tajemnicę Różańca Świętego, w ten sposób codziennie cała grupa odmawia cały różaniec. Członkowie Róży korzystają z łask, jakie nie mogliby otrzymać, sami odmawiając cały
+        różaniec.Witaj na stronie aplikacji do Róży Różańca.</p>
+    <h4>Jak się zapisać?</h4>
+    <ol>
+        <li>Zapoznaj się ze stroną na Facebooku <a href="https://www.facebook.com/tajemnicerozancaswietego/">Strona Żywych Róż Różańca</a></li>
+        <li>Wybierz intencję i dołącz do grupy na facebooku <a href="https://www.facebook.com/pg/tajemnicerozancaswietego/groups/">Dostępne grupy</a></li>
+        <li>Zaloguj się do aplikacji swoim kontem z facebooka - bez obaw, aplikacja wymaga tylko podstawowych uprawnień</li>
+        <li>Po zalogowaniu skonfiguruj swoje konto, zgodnie z poleceniami</li>
+    </ol>
+    <h4>Skąd mam wiedzieć, którą tajemnicę odmawiać?</h4>
+    <p>po zalogowaniu i skonfigurowaniu konta, poniżej znajdziesz wszystkie niezbędne informacje.</p>
+</div>
+<div id="status" class="desc bar">
+    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+    <div id="divTable" style='display: none'></div>
+    <form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
+        <div id="divUsersList"></div>
+        <br>
+        <input type="submit" value="zaakceptuj" class="myButton" style="float: right;"><br>
+    </form>
+</div>
 </body>
 </html>

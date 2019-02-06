@@ -233,6 +233,7 @@ function showStatus(user_id) {
 function statusChangeCallback2(response) {
     console.log('statusChangeCallback');
     if (response.status === 'connected') {
+    //document.getElementById('decription').style.display = 'none';
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
             $.getJSON("https://kgacek.pythonanywhere.com/_new_users",
                 function (data) {
@@ -249,5 +250,8 @@ function statusChangeCallback2(response) {
         } else {
             showStatus(response.authResponse["userID"]);
         }
+    }
+    else{
+    document.getElementById('decription').style.display = 'block';
     }
 }

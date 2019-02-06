@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, url_for
 from pymessenger.bot import Bot
 
 import flask_db
@@ -38,7 +38,7 @@ def get_new_users():
     else:
         data = request.form
         flask_db.set_user_verified(data)
-        return render_template('index.html')
+        return redirect(url_for('/'))
 
 
 @app.route('/_add_intention', methods=['GET', 'POST'])
@@ -47,7 +47,7 @@ def add_intention():
     data = request.form
     print(str(data))
     flask_db.add_user_intention(data)
-    return render_template('login.html')
+    return redirect(url_for('/login'))
 
 
 @app.route('/_get_all_intentions')

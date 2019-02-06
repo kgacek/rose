@@ -99,17 +99,39 @@ table.iTable thead th {
   text-align: center;
 }
 
-#titleFont {
+div.logbar{
+float: right;
+margin-bottom: 10px;
+
+}
+div.bar{
+max-width: 800px;
+margin: auto;
+}
+
+
+div.desc{
+margin-top: 25px;
+margin-bottom: 25px;
+border: 1px solid #0F8CCB;
+border-radius: 17px;
+background-color: #D8E8F5;
+padding: 25px;
+}
+
+div.title{
 font-family: Georgia, serif;
+height: 70px;
+background-color: #A3DDFF;
+border: 2px solid #0F8CCB;
+border-radius: 17px;
+padding: 25px;
 font-size: 25px;
 letter-spacing: 2px;
 word-spacing: 2px;
 color: #000000;
-font-weight: normal;
-text-decoration: none;
-font-style: normal;
-font-variant: normal;
-text-transform: none;
+text-align: center;
+clear: both;
 }
 
 #tf {
@@ -124,3 +146,4 @@ font-style: normal;
 font-variant: normal;
 text-transform: none;
 }
+
