@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 
-from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR, OFFSET
+from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR
 
 """
 Module for handling actions  which should be invoked outside Flask - periodic tasks, DB setup etc.
@@ -68,7 +68,8 @@ class Manager(object):
         """Gets all user-rose pair with'ACTIVE' status <offset> days before rose.ends
         :return dict {user_psid: (intention name, patron name, rose.ends date)}"""
         _log("getting not confirmed users..")
-        expiring_roses = self.session.query(Rose).filter(Rose.ends < timedelta(days=OFFSET) + date.today()).all()
+        expiring_roses = self.session.query(Rose).filter(
+            Rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()).all()
         msg = defaultdict(list)
         for rose in expiring_roses:
             for association in rose.users:
