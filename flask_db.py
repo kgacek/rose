@@ -4,6 +4,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
 import yaml
+import os
 
 from my_db import metadata, User, Intention, Prayer, AssociationUR
 
@@ -11,7 +12,7 @@ from my_db import metadata, User, Intention, Prayer, AssociationUR
 Module for handling DB related tasks in flask application
 """
 
-with open('config.yaml') as f:
+with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
 db = SQLAlchemy(metadata=metadata)

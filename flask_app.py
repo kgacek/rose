@@ -6,12 +6,13 @@ from pymessenger.bot import Bot
 
 import flask_db
 import yaml
+import os
 
 """
 Flask application
 """
 
-with open('config.yaml') as f:
+with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
 app = Flask(__name__)
@@ -22,7 +23,7 @@ bot = Bot(CONFIG['token']['test'])
 
 def _log(msg):
     with open(CONFIG['log']['flask_app'], 'a+') as f:
-        f.write(msg)
+        f.write(str(msg))
 
 
 @app.route('/')
@@ -91,6 +92,7 @@ def receive_message():
         for event in output['entry']:
             messaging = event['messaging']
             for message in messaging:
+                _log(message)
                 if message.get('message'):
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
@@ -110,7 +112,7 @@ def verify_fb_token(token_sent):
 
 def process_message(recipient_id, msg):
     if "we have new user" in msg:
-        return "Witaj w Aplikacji Róż Różańca. Wybierz 'menu' aby się zapisać."
+        return "Witaj w Aplikacji Róż Różańca. Wybierz 'Uruchom Aplikację' aby się zapisać."
     elif "wypisz" in msg:
         flask_db.unsubscribe_user(recipient_id)
         return "Zostaleś wypisany."

@@ -8,6 +8,7 @@ import yaml
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
+import os
 
 from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR
 
@@ -15,7 +16,7 @@ from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, Associat
 Module for handling actions  which should be invoked outside Flask - periodic tasks, DB setup etc.
 """
 
-with open('config.yaml') as f:
+with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
 bot = Bot(CONFIG['token']['test'])
