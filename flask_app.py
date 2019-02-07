@@ -31,6 +31,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/intentions')
+def intentions():
+    return render_template('intentions.html')
+
+
 @app.route('/_new_users', methods=['GET', 'POST'])
 def get_new_users():
     if request.method == 'GET':

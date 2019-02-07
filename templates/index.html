@@ -8,30 +8,7 @@
 <body>
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script type=text/javascript src="/static/js/rose_scripts.js"></script>
-<script>
-window.fbAsyncInit = function () {
-        FB.init({
-            appId: '1061023747434571',
-            cookie: true,  // enable cookies to allow the server to access
-                           // the session
-            xfbml: true,  // parse social plugins on this page
-            version: 'v3.2' // use graph api version 2.8
-        });
-        FB.getLoginStatus(function (response) {
-            indexLoginCallback(response);
-        });
-
-    };
-    // Load the SDK asynchronously
-    (function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-</script>
+<script type=text/javascript src="/static/js/fbload.js"></script>
 <div id="bar" class="bar">
     <div id="navBar"></div>
     <div class="fb-login-button logbar" data-size="small" data-button-type="login_with" data-auto-logout-link="true" data-use-continue-as="true" data-onlogin="loginbutton2()"></div>
