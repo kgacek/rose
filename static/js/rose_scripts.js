@@ -138,8 +138,8 @@ function addIntention() {
 
 }
 
-function statusChangeCallback(response) {
-    console.log('statusChangeCallback');
+function webviewLoginCallback(response) {
+    console.log('webviewLoginCallback');
     if (response.status === 'connected') {
         waitForGlobal(function () {
             fb_user_id = response.authResponse["userID"];
@@ -155,12 +155,12 @@ function statusChangeCallback(response) {
 
 function loginbutton() {
     FB.getLoginStatus(function (response) {
-        statusChangeCallback(response);
+        webviewLoginCallback(response);
     });
 }
 function loginbutton2() {
     FB.getLoginStatus(function (response) {
-        statusChangeCallback2(response);
+        indexLoginCallback(response);
     });
 }
 function genUsersList(data) {
@@ -230,8 +230,8 @@ function showStatus(user_id) {
     });
 }
 
-function statusChangeCallback2(response) {
-    console.log('statusChangeCallback');
+function indexLoginCallback(response) {
+    console.log('webviewLoginCallback');
     if (response.status === 'connected') {
     //document.getElementById('decription').style.display = 'none';
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow

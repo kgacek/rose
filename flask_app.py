@@ -47,7 +47,7 @@ def add_intention():
     data = request.form
     print(str(data))
     flask_db.add_user_intention(data)
-    return redirect(url_for('/login'))
+    return redirect(url_for('/webview'))
 
 
 @app.route('/_get_all_intentions')
@@ -72,9 +72,9 @@ def get_users_intentions():
         return "Message Processed, You can close this window"
 
 
-@app.route("/login")
-def login():
-    return render_template('login.html')
+@app.route("/webview")
+def webview():
+    return render_template('webview.html')
 
 
 # We will receive messages that Facebook sends our bot at this endpoint

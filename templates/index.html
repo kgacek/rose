@@ -18,7 +18,7 @@ window.fbAsyncInit = function () {
             version: 'v3.2' // use graph api version 2.8
         });
         FB.getLoginStatus(function (response) {
-            statusChangeCallback2(response);
+            indexLoginCallback(response);
         });
 
     };
