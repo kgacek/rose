@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
 
-association_table_U_I = Table('association_u_i', Base.metadata, Column('users_psid', String(50), ForeignKey('users.psid')),
+association_table_U_I = Table('association_u_i', Base.metadata, Column('users_id', String(50), ForeignKey('users.global_id')),
                               Column('intentions_id', String(60), ForeignKey('intentions.id')))
 
 
@@ -23,7 +23,7 @@ class AssociationUR(Base):
     EXPIRED - when user didn't subscribed to next month and rose.ends was reached
     """
     __tablename__ = 'association_u_r'
-    user_psid = Column(String(50), ForeignKey('users.psid'), primary_key=True)
+    user_id = Column(String(50), ForeignKey('users.global_id'), primary_key=True)
     rose_id = Column(Integer, ForeignKey('roses.id'), primary_key=True)
     status = Column(String(50))
     rose = relationship('Rose', back_populates="users")
@@ -46,8 +46,8 @@ class User(Base):
     OBSOLETE - when unsubscribed
     """
     __tablename__ = 'users'
-    psid = Column(String(50), primary_key=True)
-    global_id = Column(String(50))  # ToDo consider making this ID as a primary key
+    global_id = Column(String(50), primary_key=True)
+    psid = Column(String(50))  # ToDo consider making this ID as a primary key
     fullname = Column(String(50))
     status = Column(String(50))
     intentions = relationship("Intention", secondary=association_table_U_I, back_populates="users")
@@ -116,5 +116,5 @@ class Prayer(Base):
     id = Column(Integer, primary_key=True)
     ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
-    user_psid = Column(String(50), ForeignKey('association_u_r.user_psid'))
+    user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
     association = relationship("AssociationUR", back_populates="prayers")

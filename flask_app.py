@@ -38,7 +38,7 @@ def get_new_users():
     else:
         data = request.form
         flask_db.set_user_verified(data)
-        return redirect(url_for('/'))
+        return redirect(url_for('index'))
 
 
 @app.route('/_add_intention', methods=['GET', 'POST'])
@@ -47,13 +47,13 @@ def add_intention():
     data = request.form
     print(str(data))
     flask_db.add_user_intention(data)
-    return redirect(url_for('/webview'))
+    return redirect(url_for('webview'))
 
 
 @app.route('/_get_all_intentions')
 def get_all_intentions():
-    user_psid = request.args.get('user_psid')
     user_id = request.args.get('user_id')
+    user_psid = request.args.get('user_psid')
     if user_psid and user_id:
         username = bot.get_user_info(user_id)['name']
         flask_db.connect_user_id(user_id, user_psid, username)
@@ -119,12 +119,12 @@ def process_message(recipient_id, msg):
     if "we have new user" in msg:
         return "Witaj w Aplikacji Róż Różańca. Wybierz 'Uruchom Aplikację' aby się zapisać."
     elif "wypisz" in msg:
-        flask_db.unsubscribe_user(recipient_id)
+        flask_db.unsubscribe_user(user_psid=recipient_id)
         return "Zostaleś wypisany."
     elif "zapisz" in msg:  # ToDo remove after review
         return "Zostaleś zapisany."
     elif "potwierdzam" == msg:
-        flask_db.subscribe_user(recipient_id)
+        flask_db.subscribe_user(user_psid=recipient_id)
         return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
     else:
         return "Nie rozumiem"

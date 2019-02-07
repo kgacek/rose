@@ -67,7 +67,7 @@ class Manager(object):
 
     def get_not_confirmed_users(self):
         """Gets all user-rose pair with'ACTIVE' status <offset> days before rose.ends
-        :return dict {user_psid: (intention name, patron name, rose.ends date)}"""
+        :return dict {user_id: (intention name, patron name, rose.ends date)}"""
         _log("getting not confirmed users..")
         expiring_roses = self.session.query(Rose).filter(
             Rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()).all()
@@ -75,7 +75,7 @@ class Manager(object):
         for rose in expiring_roses:
             for association in rose.users:
                 if association.status == "ACTIVE":
-                    msg[association.user_psid].append((rose.intention.name, rose.patron.name, rose.ends))
+                    msg[association.user.psid].append((rose.intention.name, rose.patron.name, rose.ends))
         _log(msg)
         return msg
 
@@ -101,9 +101,9 @@ class Manager(object):
 
     def get_unsubscribed_users(self):
         """Gets users who not subscribed for next month in at least one rose or signed out manually
-        :return two tuples with user.psid for expired and unsubscribed users"""
+        :return two tuples with user.global_id for expired and unsubscribed users"""
         _log('getting unsubscribed users..')
-        expired_users = set(el.user_psid for el in self.session.query(AssociationUR).filter_by(status="EXPIRED").all())
+        expired_users = set(el.user.psid for el in self.session.query(AssociationUR).filter_by(status="EXPIRED").all())
         unsubscribed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
         _log('expired: {}\n unsubscribed: {}'.format(str(expired_users), str(unsubscribed_users)))
         return tuple(expired_users), tuple(unsubscribed_users)
@@ -148,7 +148,7 @@ class Manager(object):
         active_users = self.session.query(User).filter_by(status="ACTIVE").all()
         free_users = self.session.query(User).filter_by(status="VERIFIED").all()
         #  ToDo maybe there is a better way to find people who dont have roses assigned for all intentions
-        free_users.extend([user.psid for user in active_users if len(user.roses) < len(user.intentions)])
+        free_users.extend([user for user in active_users if len(user.roses) < len(user.intentions)])
         self.session.query()
         for user in free_users:
             for intention in user.intentions:

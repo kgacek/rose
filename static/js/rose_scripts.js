@@ -23,11 +23,11 @@ function genSelect(data, select_name) {
 }
 
 function selectIntention(data) {
-    var psid = document.createElement("INPUT");
-    psid.name="user_psid";
-    psid.value=fb_user_psid;
-    psid.style.display = 'none';
-    document.getElementById('newIntention').appendChild(psid);
+    var id = document.createElement("INPUT");
+    id.name="user_id";
+    id.value=fb_user_id;
+    id.style.display = 'none';
+    document.getElementById('newIntention').appendChild(id);
     document.getElementById('statusTitle').innerText = 'Wybierz intencję do której chcesz dołączyć';
     document.getElementById('newIntention').style.display = 'block';
     document.getElementById('newIntentionDiv').appendChild(genSelect(data, 'intention_name'));
@@ -46,8 +46,8 @@ function genTable(data) {
     cell.innerText = "patron";
     row.appendChild(cell);
     cell = document.createElement("INPUT");
-    cell.name="user_psid";
-    cell.value=fb_user_psid;
+    cell.name="user_id";
+    cell.value=fb_user_id;
     cell.style.display = 'none';
     row.appendChild(cell);
     cell = document.createElement("TH");
@@ -230,11 +230,46 @@ function showStatus(user_id) {
     });
 }
 
+function updateNavbar(status){
+    var bar=document.getElementById('navBar')
+    while (bar.firstChild) {
+        bar.removeChild(bar.firstChild);
+    }
+    var btn = document.createElement("a");
+    btn.className = "navButton"
+    btn.href="https://kgacek.pythonanywhere.com/"
+    btn.innerText="Strona Główna"
+    bar.appendChild(btn)
+
+    if (status === "connected" || status === "admin"){
+        btn = document.createElement("a");
+        btn.className = "navButton"
+        btn.href="https://kgacek.pythonanywhere.com/roses"
+        btn.innerText="Moje Róże"
+        bar.appendChild(btn)
+        btn = document.createElement("a");
+        btn.className = "navButton"
+        btn.href="https://kgacek.pythonanywhere.com/intentions"
+        btn.innerText="Moje Intencje"
+        bar.appendChild(btn)
+
+    }
+    if (status === "admin"){
+        btn = document.createElement("a");
+        btn.className = "navButton"
+        btn.href="https://kgacek.pythonanywhere.com/admin"
+        btn.innerText="Panel Administratora"
+        bar.appendChild(btn)
+    }
+}
+
 function indexLoginCallback(response) {
     console.log('webviewLoginCallback');
     if (response.status === 'connected') {
+    updateNavbar('connected');
     //document.getElementById('decription').style.display = 'none';
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
+            updateNavbar('admin');
             $.getJSON("https://kgacek.pythonanywhere.com/_new_users",
                 function (data) {
                     if (Object.keys(data).length > 0) {
@@ -252,6 +287,7 @@ function indexLoginCallback(response) {
         }
     }
     else{
+    updateNavbar('disconnected');
     document.getElementById('decription').style.display = 'block';
     }
 }
