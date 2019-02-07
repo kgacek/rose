@@ -11,6 +11,14 @@
 <script type=text/javascript src="/static/js/roses.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
-<h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+<div id="status" class="desc bar">
+    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+    <form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
+        <table id="myTable" class="iTable"></table>
+        <br>
+        <input type="submit" value="Zapisz" class="myButton" style="float: right;"><br>
+    </form>
+</div>
+<div id="choice_buttons" ></div>
 </body>
 </html>

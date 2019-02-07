@@ -81,10 +81,13 @@ function showStatus(user_id) {
 function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
+        fb_user_id = response.authResponse["userID"];
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
         }
         showStatus(response.authResponse["userID"]);
+        fb_user_psid = false; // todo: poprawic
+        addIntention()
     }
     else{
     window.location.replace("https://kgacek.pythonanywhere.com/");

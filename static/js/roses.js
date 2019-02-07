@@ -60,7 +60,7 @@ function genTable(data) {
 function already_user() {
     document.getElementById('choice_buttons').style.display = 'none';
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
-        user_psid: fb_user_psid
+        user_id: fb_user_id
     }, function (data) {
         if (!data['active']){
             document.getElementById('statusTitle').innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, cierpliwości!';
@@ -94,11 +94,10 @@ function LoginCallback(response) {
         fb_user_id = response.authResponse["userID"];
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
-            document.getElementById('statusTitle').innerText = 'Logowanie się powiodło Adminie, twoje ID to ' + fb_user_id;
         } else {
             updateNavbar('connected');
-            document.getElementById('statusTitle').innerText = 'Logowanie się powiodło, twoje ID to ' + fb_user_id;
         }
+        already_user()
     }
     else{
     window.location.replace("https://kgacek.pythonanywhere.com/");
