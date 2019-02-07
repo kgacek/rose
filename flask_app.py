@@ -41,6 +41,11 @@ def roses():
     return render_template('roses.html')
 
 
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
+
+
 @app.route('/_new_users', methods=['GET', 'POST'])
 def get_new_users():
     if request.method == 'GET':

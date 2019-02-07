@@ -8,7 +8,7 @@ window.fbAsyncInit = function () {
             status : true
         });
         FB.getLoginStatus(function (response) {
-            indexLoginCallback(response);
+            LoginCallback(response);
         });
 
     };

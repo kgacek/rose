@@ -7,7 +7,8 @@
 </head>
 <body>
 <script type=text/javascript src="/static/js/jquery.js"></script>
-<script type=text/javascript src="/static/js/rose_scripts.js"></script>
+<script type=text/javascript src="/static/js/header.js"></script>
+<script type=text/javascript src="/static/js/index.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
 
@@ -28,15 +29,6 @@
     </ol>
     <h4>Skąd mam wiedzieć, którą tajemnicę odmawiać?</h4>
     <p>po zalogowaniu i skonfigurowaniu konta, poniżej znajdziesz wszystkie niezbędne informacje.</p>
-</div>
-<div id="status" class="desc bar">
-    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
-    <div id="divTable" style='display: none'></div>
-    <form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
-        <div id="divUsersList"></div>
-        <br>
-        <input type="submit" value="zaakceptuj" class="myButton" style="float: right;"><br>
-    </form>
 </div>
 </body>
 </html>
