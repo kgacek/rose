@@ -77,6 +77,11 @@ def webview():
     return render_template('webview.html')
 
 
+@app.route("/login") # todo remove this
+def login():
+    return render_template('webview.html')
+
+
 # We will receive messages that Facebook sends our bot at this endpoint
 @app.route("/_webhook", methods=['GET', 'POST'])
 def receive_message():
