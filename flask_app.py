@@ -69,10 +69,16 @@ def add_intention():
 def get_all_intentions():
     user_id = request.args.get('user_id')
     user_psid = request.args.get('user_psid')
-    if user_psid and user_id:
+    if user_id:
         username = bot.get_user_info(user_id)['name']
         flask_db.connect_user_id(user_id, user_psid, username)
     return jsonify(flask_db.get_all_intentions())
+
+
+@app.route('/_get_users_prayers')
+def get_users_prayers():
+    user_id = request.args.get('user_id')
+    return jsonify(flask_db.get_user_prayers(user_id))
 
 
 @app.route('/_get_users_intentions', methods=['GET', 'POST'])

@@ -17,28 +17,18 @@ function selectIntention(data) {
     id.value=fb_user_id;
     id.style.display = 'none';
     document.getElementById('newIntention').appendChild(id);
-    document.getElementById('statusTitle').innerText = 'Wybierz intencję do której chcesz dołączyć';
-    document.getElementById('newIntention').style.display = 'block';
     document.getElementById('newIntentionDiv').appendChild(genSelect(data, 'intention_name'));
 
 }
 
-
-
-function addIntention() {
-    console.log('addIntention');
-    document.getElementById('choice_buttons').style.display = 'none';
+function IntentionForm(){
     $.getJSON("https://kgacek.pythonanywhere.com/_get_all_intentions", {
         user_psid: fb_user_psid,
         user_id: fb_user_id,
     }, function (data) {
         selectIntention(data);
     });
-    document.getElementById('statusTitle').innerText = 'Wybierz intencję do której chcesz dołączyć';
-    document.getElementById('newIntention').style.display = 'block';
-
 }
-
 
 function genIntentionList(approved, pending) {
     var myTable = document.getElementById('divTable');
@@ -87,7 +77,7 @@ function LoginCallback(response) {
         }
         showStatus(response.authResponse["userID"]);
         fb_user_psid = false; // todo: poprawic
-        addIntention()
+        IntentionForm()
     }
     else{
     window.location.replace("https://kgacek.pythonanywhere.com/");

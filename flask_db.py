@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import yaml
 import os
 
-from my_db import metadata, User, Intention, Prayer, AssociationUR
+from my_db import metadata, User, Intention, Prayer, AssociationUR, Mystery
 
 """
 Module for handling DB related tasks in flask application
@@ -38,10 +38,10 @@ def connect_user_id(user_id, user_psid, username):
     Additionally, fullname is updated."""
     if user_id:
         user = _get_user(user_id)
-        if user.psid != user_psid:
+        if user_psid:
             user.psid = user_psid
-            user.fullname = username
-            db.session.commit()
+        user.fullname = username
+        db.session.commit()
 
 
 def get_all_intentions():
@@ -65,6 +65,25 @@ def add_user_intention(data):
         user.intentions.append(intention)
     db.session.commit()
     return [intention.name for intention in user.intentions]
+
+
+def get_user_prayers(user_id):
+    """Gets user prayers and status
+    :param user_id: User.global_id
+    :return dict, {<patron name> : {'ends': <cycle end>, 'current':<current mystery>, next:<next mystery>, next_status: <'NOT_ACTIVE','TO_APPROVAL','APPROVED'>}..}"""
+    user = _get_user(user_id)
+    prayers = {}
+    for asso in user.roses:
+        if asso.status != 'EXPIRED':
+            current_mystery = asso.prayers[-1].mystery
+            next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 20 + 1).first()
+            if asso.status == 'ACTIVE':
+                status = 'TO_APPROVAL' if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today() else 'NOT_ACTIVE'
+            else:
+                status = 'APPROVED'
+            prayers[asso.rose.patron.name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status}
+    _log(prayers)
+    return prayers
 
 
 def get_user_intentions(user_psid, user_id):

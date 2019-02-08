@@ -103,6 +103,7 @@ class Mystery(Base):
     __tablename__ = 'mysteries'
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
+    prayer = relationship('Prayer', uselist=False, back_populates='mystery')
 
 
 class Prayer(Base):
@@ -117,4 +118,5 @@ class Prayer(Base):
     ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
     user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
+    mystery = relationship('Mystery', back_populates='prayer')
     association = relationship("AssociationUR", back_populates="prayers")

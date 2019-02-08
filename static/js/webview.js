@@ -1,3 +1,12 @@
+function addIntention() {
+    console.log('addIntention');
+    document.getElementById('choice_buttons').style.display = 'none';
+    IntentionForm()
+    document.getElementById('statusTitle').innerText = 'Wybierz intencję do której chcesz dołączyć';
+    document.getElementById('newIntention').style.display = 'block';
+
+}
+
 var waitForGlobal = function (callback) {
     if (typeof fb_user_psid !== 'undefined') {
         callback();

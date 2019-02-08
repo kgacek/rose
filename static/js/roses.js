@@ -57,6 +57,34 @@ function genTable(data) {
     myTable.appendChild(tbody);
 }
 
+
+function genDivPrayer(data){
+    var div = document.createElement('DIV')
+    div.innerText= 'konczy sie : ' + data['ends'] + ' aktualnie: ' + data['current'] + ' potem: ' + data['next'] + ' status: ' + data['next_status']
+    return div
+}
+
+function user_prayers() {
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_prayers", {
+        user_id: fb_user_id
+    }, function (data) {
+        var prayers = document.getElementById('prayers')
+        while (prayers.firstChild) {
+            prayers.removeChild(prayers.firstChild);
+        }
+        if(Object.keys(data).length > 0){
+            for (patron in data){
+                console.log(patron)
+                prayers.appendChild(genDivPrayer(data[patron]))
+            }
+        }
+    });
+
+}
+
+
+
+
 function already_user() {
     document.getElementById('choice_buttons').style.display = 'none';
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
@@ -98,6 +126,7 @@ function LoginCallback(response) {
             updateNavbar('connected');
         }
         already_user()
+        user_prayers()
     }
     else{
     window.location.replace("https://kgacek.pythonanywhere.com/");
