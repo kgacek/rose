@@ -75,7 +75,7 @@ def get_user_prayers(user_id):
     prayers = {}
     for asso in user.roses:
         if asso.status != 'EXPIRED':
-            current_mystery = asso.prayers[-1].mystery
+            current_mystery = asso.prayers[-1].mystery # ToDo itsw wrong - prayers contains all prayers across all roses!;(
             next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 20 + 1).first()
             if asso.status == 'ACTIVE':
                 status = 'TO_APPROVAL' if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today() else 'NOT_ACTIVE'
@@ -125,12 +125,10 @@ def set_user_roses(data):
         if intention.name in data:
             for rose in intention.roses:
                 if rose.patron.name == data[intention.name]:
-                    asso = AssociationUR(status="ACTIVE")
-                    asso.rose = rose
-                    user.roses.append(asso)
+                    asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
                     prayer = Prayer(mystery_id=data[intention.name + '_mystery'], ends=rose.ends)
-                    prayer.association = asso
-                    db.session.add(prayer)
+                    asso.prayers.append(prayer)
+                    db.session.add(asso)
     db.session.commit()
     return True
 

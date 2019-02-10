@@ -28,7 +28,7 @@ class AssociationUR(Base):
     status = Column(String(50))
     rose = relationship('Rose', back_populates="users")
     user = relationship('User', back_populates="roses")
-    prayers = relationship('Prayer', back_populates="association", order_by="Prayer.id")
+    prayers = relationship('Prayer', primaryjoin="and_(AssociationUR.user_id==Prayer.user_id, AssociationUR.rose_id==Prayer.rose_id)", order_by="Prayer.id")
 
 
 class User(Base):
@@ -118,5 +118,5 @@ class Prayer(Base):
     ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
     user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
+    rose_id = Column(Integer, ForeignKey('association_u_r.rose_id'))
     mystery = relationship('Mystery', back_populates='prayer')
-    association = relationship("AssociationUR", back_populates="prayers")

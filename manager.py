@@ -113,17 +113,16 @@ class Manager(object):
         :param user:  User object
         :param intention: Intention object"""
         _log('creating new rose..')
-        patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
+        patron = self.session.query(Patron).filter(Patron.rose.is_(None)).first()  # todo handling case when no patrons left
         _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
                     started=date.today(),
                     ends=date.today() + relativedelta(months=1),
                     patron_id=patron.id)
-        asso = AssociationUR(status="ACTIVE")
-        asso.rose = rose
+        asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
         new = Prayer(mystery_id=1, ends=rose.ends)
         asso.prayers.append(new)
-        user.roses.append(asso)
+        self.session.commit()
 
     @staticmethod
     def get_free_mystery(rose):
@@ -147,7 +146,7 @@ class Manager(object):
         _log('adding new users to roses')
         active_users = self.session.query(User).filter_by(status="ACTIVE").all()
         free_users = self.session.query(User).filter_by(status="VERIFIED").all()
-        #  ToDo maybe there is a better way to find people who dont have roses assigned for all intentions
+        #  ToDo maybe there is a better way to find people who don't have roses assigned for all intentions
         free_users.extend([user for user in active_users if len(user.roses) < len(user.intentions)])
         self.session.query()
         for user in free_users:
@@ -155,11 +154,9 @@ class Manager(object):
                 roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
                 not_full_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
                 if not_full_roses:
-                    asso = AssociationUR(status="ACTIVE")
-                    asso.rose = not_full_roses[0]
+                    asso = AssociationUR(status="ACTIVE", rose=not_full_roses[0], user=user)
                     new = Prayer(mystery_id=self.get_free_mystery(not_full_roses[0]), ends=not_full_roses[0].ends)
                     asso.prayers.append(new)
-                    user.roses.append(asso)
                 else:
                     self.create_new_rose(user, intention)
             user.status = "ACTIVE"
