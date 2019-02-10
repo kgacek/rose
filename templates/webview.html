@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Facebook Login JavaScript Example</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+<script type=text/javascript src="/static/js/jquery.js"></script>
+<script type=text/javascript src="/static/js/webview.js"></script>
+<script type=text/javascript src="/static/js/roses.js"></script>
+<script type=text/javascript src="/static/js/intentions.js"></script>
+<h4 id="statusTitle">Uruchamiam aplikację..</h4>
+<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="false" data-use-continue-as="true" data-onlogin="loginbutton()" style="display: none;" id="loginBtn"></div>
+
+<form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
+<table id="myTable" class="iTable"></table> <br>
+  <input type="submit" value="Zapisz" class="myButton" style="float: right;"><br>
+</form>
+<hr>
+<form id="newIntention" action="https://kgacek.pythonanywhere.com/_add_intention" method="post" style='display: none'>
+    <div id="newIntentionDiv"></div> <br>
+  <input type="submit" value="Dodaj mnie" class="myButton" style="float: right;"><br>
+</form>
+
+<div id="choice_buttons" style="display: none;">
+    <a href="#" onclick="addIntention()" class="logbutton">Zapisać się do nowej intencji</a>
+    <a href="#" onclick="already_user()" class="logbutton">podać tajemnice, które odmawiam</a>
+    <a href="#" onclick="MessengerExtensions.requestCloseBrowser();" class="logbutton">To wszystko, dzięki!</a>
+</div>
+
+</body>
+</html>

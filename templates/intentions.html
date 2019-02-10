@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <title>Intencje</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+<script type=text/javascript src="/static/js/jquery.js"></script>
+<script type=text/javascript src="/static/js/header.js"></script>
+<script type=text/javascript src="/static/js/intentions.js"></script>
+<script type=text/javascript src="/static/js/fbload.js"></script>
+{% include 'header.html' %}
+<div id="status" class="desc bar">
+    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+    <div id="divTable"></div>
+</div>
+<div  class="desc bar">
+    <h3>Wybierz Intencje, w których chcesz się modlić</h3>
+    <form id="newIntention" action="https://kgacek.pythonanywhere.com/_add_intention" method="post">
+        <div id="newIntentionDiv"></div>
+        <br>
+        <input type="submit" value="Dodaj mnie" class="myButton" style="float: right;"><br>
+    </form>
+</div>
+<div id="choice_buttons" ></div>
+</body>
+</html>

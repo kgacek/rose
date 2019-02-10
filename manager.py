@@ -8,6 +8,7 @@ import yaml
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
+import os
 
 from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, AssociationUR
 
@@ -15,7 +16,7 @@ from my_db import Base, Intention, Prayer, Rose, Patron, Mystery, User, Associat
 Module for handling actions  which should be invoked outside Flask - periodic tasks, DB setup etc.
 """
 
-with open('config.yaml') as f:
+with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
 bot = Bot(CONFIG['token']['test'])
@@ -66,7 +67,7 @@ class Manager(object):
 
     def get_not_confirmed_users(self):
         """Gets all user-rose pair with'ACTIVE' status <offset> days before rose.ends
-        :return dict {user_psid: (intention name, patron name, rose.ends date)}"""
+        :return dict {user_id: (intention name, patron name, rose.ends date)}"""
         _log("getting not confirmed users..")
         expiring_roses = self.session.query(Rose).filter(
             Rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()).all()
@@ -74,7 +75,7 @@ class Manager(object):
         for rose in expiring_roses:
             for association in rose.users:
                 if association.status == "ACTIVE":
-                    msg[association.user_psid].append((rose.intention.name, rose.patron.name, rose.ends))
+                    msg[association.user.psid].append((rose.intention.name, rose.patron.name, rose.ends))
         _log(msg)
         return msg
 
@@ -100,9 +101,9 @@ class Manager(object):
 
     def get_unsubscribed_users(self):
         """Gets users who not subscribed for next month in at least one rose or signed out manually
-        :return two tuples with user.psid for expired and unsubscribed users"""
+        :return two tuples with user.global_id for expired and unsubscribed users"""
         _log('getting unsubscribed users..')
-        expired_users = set(el.user_psid for el in self.session.query(AssociationUR).filter_by(status="EXPIRED").all())
+        expired_users = set(el.user.psid for el in self.session.query(AssociationUR).filter_by(status="EXPIRED").all())
         unsubscribed_users = [user.psid for user in self.session.query(User).filter_by(status="OBSOLETE").all()]
         _log('expired: {}\n unsubscribed: {}'.format(str(expired_users), str(unsubscribed_users)))
         return tuple(expired_users), tuple(unsubscribed_users)
@@ -112,17 +113,16 @@ class Manager(object):
         :param user:  User object
         :param intention: Intention object"""
         _log('creating new rose..')
-        patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
+        patron = self.session.query(Patron).filter(Patron.rose.is_(None)).first()  # todo handling case when no patrons left
         _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
                     started=date.today(),
                     ends=date.today() + relativedelta(months=1),
                     patron_id=patron.id)
-        asso = AssociationUR(status="ACTIVE")
-        asso.rose = rose
+        asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
         new = Prayer(mystery_id=1, ends=rose.ends)
         asso.prayers.append(new)
-        user.roses.append(asso)
+        self.session.commit()
 
     @staticmethod
     def get_free_mystery(rose):
@@ -146,19 +146,17 @@ class Manager(object):
         _log('adding new users to roses')
         active_users = self.session.query(User).filter_by(status="ACTIVE").all()
         free_users = self.session.query(User).filter_by(status="VERIFIED").all()
-        #  ToDo maybe there is a better way to find people who dont have roses assigned for all intentions
-        free_users.extend([user.psid for user in active_users if len(user.roses) < len(user.intentions)])
+        #  ToDo maybe there is a better way to find people who don't have roses assigned for all intentions
+        free_users.extend([user for user in active_users if len(user.roses) < len(user.intentions)])
         self.session.query()
         for user in free_users:
             for intention in user.intentions:
                 roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
                 not_full_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
                 if not_full_roses:
-                    asso = AssociationUR(status="ACTIVE")
-                    asso.rose = not_full_roses[0]
+                    asso = AssociationUR(status="ACTIVE", rose=not_full_roses[0], user=user)
                     new = Prayer(mystery_id=self.get_free_mystery(not_full_roses[0]), ends=not_full_roses[0].ends)
                     asso.prayers.append(new)
-                    user.roses.append(asso)
                 else:
                     self.create_new_rose(user, intention)
             user.status = "ACTIVE"

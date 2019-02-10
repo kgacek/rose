@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <title>Panel Adm.</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+<script type=text/javascript src="/static/js/jquery.js"></script>
+<script type=text/javascript src="/static/js/header.js"></script>
+<script type=text/javascript src="/static/js/admin.js"></script>
+<script type=text/javascript src="/static/js/fbload.js"></script>
+{% include 'header.html' %}
+<div id="status" class="desc bar">
+    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+    <form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
+        <div id="divUsersList"></div>
+        <br>
+        <input type="submit" value="zaakceptuj" class="myButton" style="float: right;"><br>
+    </form>
+</div>
+</body>
+</html>

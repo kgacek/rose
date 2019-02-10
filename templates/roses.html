@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <title>Róże</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+<script type=text/javascript src="/static/js/jquery.js"></script>
+<script type=text/javascript src="/static/js/header.js"></script>
+<script type=text/javascript src="/static/js/roses.js"></script>
+<script type=text/javascript src="/static/js/fbload.js"></script>
+{% include 'header.html' %}
+<div id="status" class="desc bar">
+    <h3>Dodaj aktualnie odmawianą tajemnicę</h3>
+    <p>Jeśli jesteś nowym użytkownikiem, nie musisz tutaj nic robić, niedługo Aplikacja sama przydzieli Ci Różę i Tajemnicę w Intencjach w których jesteś zapisany/na. Jeśli jednak uczestniczyłeś
+        wczesniej w naszej Modlitwie poza aplikacją, to w tym miejscu wybierz aktualnie odmawianą tajemnicę.</p>
+    <h4 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć w swój status</h4>
+    <form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
+        <table id="myTable" class="iTable"></table>
+        <br>
+        <input type="submit" value="Zapisz" class="myButton" style="float: right;"><br>
+    </form>
+</div>
+<div id="prayers" class="desc bar">
+</div>
+
+<div id="choice_buttons"></div>
+</body>
+</html>
