@@ -35,7 +35,11 @@ function genIntentionList(approved, pending) {
     while (myTable.firstChild) {
         myTable.removeChild(myTable.firstChild);
     }
+    var head = document.createElement("P");
+    head.innerText='Intencje do których jesteś zapisany:';
+    myTable.appendChild(head);
     var row = document.createElement("OL");
+
     for (var i = 0; i < approved.length; i++) {
         var cell = document.createElement("LI");
         cell.innerText = approved[i];
@@ -54,11 +58,16 @@ function showStatus(user_id) {
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
         user_id: user_id
     }, function (data) {
-        if (!data['active']) {
-            document.getElementById('statusTitle').innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, cierpliwości!';
-        } else if (Object.keys(data['already_assigned']).length > 0 || Object.keys(data['intentions']).length > 0) {
-
-            document.getElementById('statusTitle').innerText = 'Aktualnie Jesteś zapisany do:';
+        var status = document.getElementById('statusTitle')
+        if (Object.keys(data['already_assigned']).length > 0 || Object.keys(data['intentions']).length > 0) {
+            if (!data['active']) {
+                status.innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, twoje intencje nie są jeszcze aktywne! proszę czekać';
+                status.className = 'warning'
+            }
+            else{
+                status.className = 'approved'
+                status.innerText = 'Twoje konto jest Aktywne! Po zapisaniu do intencji sprawdź zakładkę "Moje Róże"';
+            }
             document.getElementById('divTable').style.display = 'block';
             genIntentionList(Object.keys(data['already_assigned']), Object.keys(data['intentions']));
         } else {
@@ -71,12 +80,14 @@ function showStatus(user_id) {
 function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
+        fb_user_psid = false; // todo: poprawic
         fb_user_id = response.authResponse["userID"];
+        showStatus(fb_user_id);
         if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
+        }else {
+            updateNavbar('connected');
         }
-        showStatus(response.authResponse["userID"]);
-        fb_user_psid = false; // todo: poprawic
         IntentionForm()
     }
     else{

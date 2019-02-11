@@ -26,4 +26,4 @@ inputs:
   test:
     'input_test.yaml'
 reminder_offset:
-  3
+  25

@@ -62,7 +62,7 @@ def add_intention():
     data = request.form
     print(str(data))
     flask_db.add_user_intention(data)
-    return redirect(url_for('webview'))
+    return redirect(request.form['refresh_url'])
 
 
 @app.route('/_get_all_intentions')
@@ -75,10 +75,23 @@ def get_all_intentions():
     return jsonify(flask_db.get_all_intentions())
 
 
-@app.route('/_get_users_prayers')
+@app.route('/_get_free_mysteries')
+def get_free_mysteries():
+    rose = request.args.get('rose')
+    _log("rose" + str(rose))
+    return jsonify(flask_db.get_free_mysteries(rose))
+
+
+@app.route('/_get_users_prayers', methods=['GET', 'POST'])
 def get_users_prayers():
-    user_id = request.args.get('user_id')
-    return jsonify(flask_db.get_user_prayers(user_id))
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        return jsonify(flask_db.get_user_prayers(user_id))
+    else:
+        user_id = request.form.get('user_id')
+        _log("subscribe" + str(user_id))
+        flask_db.subscribe_user(user_id)
+        return redirect(request.form['refresh_url'])
 
 
 @app.route('/_get_users_intentions', methods=['GET', 'POST'])
@@ -90,7 +103,7 @@ def get_users_intentions():
     else:
         data = request.form
         flask_db.set_user_roses(data)
-        return "Message Processed, You can close this window"
+        return redirect(request.form['refresh_url'])
 
 
 @app.route("/webview")

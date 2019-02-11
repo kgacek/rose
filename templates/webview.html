@@ -11,16 +11,21 @@
 <script type=text/javascript src="/static/js/roses.js"></script>
 <script type=text/javascript src="/static/js/intentions.js"></script>
 <h4 id="statusTitle">Uruchamiam aplikację..</h4>
-<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="false" data-use-continue-as="true" data-onlogin="loginbutton()" style="display: none;" id="loginBtn"></div>
+<div class="fb-login-button" data-size="large" data-button-type="login_with" data-auto-logout-link="false"
+     data-use-continue-as="true" data-onlogin="loginbutton()" style="display: none;" id="loginBtn"></div>
 
 <form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" style='display: none'>
-<table id="myTable" class="iTable"></table> <br>
-  <input type="submit" value="Zapisz" class="myButton" style="float: right;"><br>
+    <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/webview" style='display: none'>
+    <table id="myTable" class="iTable"></table>
+    <br>
+    <input type="submit" value="Zapisz" class="myButton"><br>
 </form>
 <hr>
 <form id="newIntention" action="https://kgacek.pythonanywhere.com/_add_intention" method="post" style='display: none'>
-    <div id="newIntentionDiv"></div> <br>
-  <input type="submit" value="Dodaj mnie" class="myButton" style="float: right;"><br>
+    <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/webview" style='display: none'>
+    <div id="newIntentionDiv"></div>
+    <br>
+    <input type="submit" value="Dodaj mnie" class="myButton"><br>
 </form>
 
 <div id="choice_buttons" style="display: none;">
