@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import yaml
 import os
 
-from my_db import metadata, User, Intention, Prayer, AssociationUR, Mystery
+from my_db import metadata, User, Intention, Prayer, AssociationUR, Mystery, Patron, Rose
 
 """
 Module for handling DB related tasks in flask application
@@ -75,7 +75,7 @@ def get_user_prayers(user_id):
     prayers = {}
     for asso in user.roses:
         if asso.status != 'EXPIRED':
-            current_mystery = asso.prayers[-1].mystery # ToDo itsw wrong - prayers contains all prayers across all roses!;(
+            current_mystery = asso.prayers[-1].mystery
             next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 20 + 1).first()
             if asso.status == 'ACTIVE':
                 status = 'TO_APPROVAL' if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today() else 'NOT_ACTIVE'
@@ -92,7 +92,7 @@ def get_user_intentions(user_psid, user_id):
     :param user_id: User.global_id
     :return dict, {'intentions': <dict>, 'active': <bool>, 'already_assigned': <dict>}
                     active - true when user.status != 'NEW'
-                    intentions - {intention_name: [list of  all rose_ids]} only for intentions where user is not yet.
+                    intentions - {intention_name: [roses]} only for intentions where user is not yet.
                     already_assigned - {intention_name: assigned rose}
                     intentions + already_assingned = all intentions"""
     if user_id:
@@ -117,7 +117,7 @@ def get_user_intentions(user_psid, user_id):
 
 def set_user_roses(data):
     """Sets user roses basing on input data.
-    :param data: dict, {user_id: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_id}"""
+    :param data: dict, {user_id: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_name}"""
     user = _get_user(data['user_id'])
     user.status = "ACTIVE"
     print(str(user.roses))
@@ -126,11 +126,34 @@ def set_user_roses(data):
             for rose in intention.roses:
                 if rose.patron.name == data[intention.name]:
                     asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
-                    prayer = Prayer(mystery_id=data[intention.name + '_mystery'], ends=rose.ends)
+                    mystery = db.session.query(Mystery).filter_by(name=data[intention.name + '_mystery']).first()
+                    prayer = Prayer(mystery=mystery, ends=rose.ends)
                     asso.prayers.append(prayer)
                     db.session.add(asso)
     db.session.commit()
     return True
+
+
+def get_current_mysteries(rose):
+    """Gets all mysteries currently used in given rose
+    :return list of mysteries obj"""
+    if not isinstance(rose, Rose):
+        rose = db.session.query(Patron).filter_by(name=rose).first().rose
+    _log("getting first all free mysteries in rose : {}".format(rose.patron.name))
+    current_mysteries = []
+    for asso in rose.users:
+        for prayer in asso.prayers:
+            if prayer.ends == rose.ends:
+                current_mysteries.append(prayer.mystery)
+    return current_mysteries
+
+
+def get_free_mysteries(rose):
+    """Gets all mysteries currently free in given rose
+    :return list of free mysteries obj"""
+    current_m = get_current_mysteries(rose)
+    all_m = db.session.query(Mystery).all()
+    return [el.name for el in all_m if el not in current_m]
 
 
 def set_user_verified(data):

@@ -31,32 +31,24 @@ intentions:
     "164379880875870"
   "Różane Pogotowie Modlitewne":
     "1592420170816208"
-  "Zanurzenie intencji modlitewnych we Krwi Pana Jezusa":
-    "2218474785100861"
   "Róża Różańcowa w intencji osób chorych na Parkinsona":
     "332757387257578"
   "Psałterz Różany":
     "642811842749838"
-  Róża różańcowa w intencji lepszego kodu:
-    "2400306070040832"
-  Róża różańcowa w intencji zaakceptowania aplikacji:
-    "390604118351798"
 
 roses:
-  "2400306070040832":
+  "866268920221787":
     - "Benedykt Opat"
     - "Bernard"
     - "Cyryl i Metody"
     - "Hildegarda"
     - "Jacek"
     - "Jan Bosko"
-  "390604118351798":
     - "Józef"
     - "Maksymilian Maria Kolbe"
     - "Matka Boża Krolowa Polski"
     - "Matka Boża z Montligeon"
     - "Patryk"
-  "866268920221787":
     - "Agnieszka z Montepulciano"
     - "Bazylii Wielki"
     - "Benedykt Opat"
@@ -452,23 +444,23 @@ patrons:
   - "św. Tytus"
 
 mysteries:
-  - "Zwiastowanie Najświętszej Maryi Pannie"
-  - "Nawiedzenie świętej Elżbiety"
-  - "Narodzenie Jezusa"
-  - "Ofiarowanie Jezusa w świątyni"
-  - "Odnalezienie Jezusa w świątyni"
-  - "Chrzest Jezusa w Jordanie"
-  - "Objawienie się Jezusa w Kanie Galilejskiej"
-  - "Głoszenie królestwa i wzywanie do nawrócenia"
-  - "Przemienienie Pańskie na górze Tabor"
-  - "Ustanowienie Eucharystii"
-  - "Modlitwa Jezusa w Ogrójcu"
-  - "Biczowanie Jezusa"
-  - "Cierniem ukoronowanie Jezusa"
-  - "Dźwiganie krzyża na Kalwarię"
-  - "Ukrzyżowanie i śmierć Jezusa"
-  - "Zmartwychwstanie Jezusa Chrystusa"
-  - "Wniebowstąpienie Chrystusa"
-  - "Zesłanie Ducha Świętego"
-  - "Wniebowzięcie Najświętszej Maryi Panny"
-  - "Ukoronowanie Maryi na Królową nieba i ziemi"
+  - "1. tajemnica radosna - Zwiastowanie Najświętszej Maryi Pannie"
+  - "2. tajemnica radosna - Nawiedzenie świętej Elżbiety"
+  - "3. tajemnica radosna - Narodzenie Jezusa"
+  - "4. tajemnica radosna - Ofiarowanie Jezusa w świątyni"
+  - "5. tajemnica radosna - Odnalezienie Jezusa w świątyni"
+  - "1. tajemnica światła - Chrzest Jezusa w Jordanie"
+  - "2. tajemnica światła - Objawienie się Jezusa w Kanie Galilejskiej"
+  - "3. tajemnica światła - Głoszenie królestwa i wzywanie do nawrócenia"
+  - "4. tajemnica światła - Przemienienie Pańskie na górze Tabor"
+  - "5. tajemnica światła - Ustanowienie Eucharystii"
+  - "1. tajemnica bolesna - Modlitwa Jezusa w Ogrójcu"
+  - "2. tajemnica bolesna - Biczowanie Jezusa"
+  - "3. tajemnica bolesna - Cierniem ukoronowanie Jezusa"
+  - "4. tajemnica bolesna - Dźwiganie krzyża na Kalwarię"
+  - "5. tajemnica bolesna - Ukrzyżowanie i śmierć Jezusa"
+  - "1. tajemnica chwalebna - Zmartwychwstanie Jezusa Chrystusa"
+  - "2. tajemnica chwalebna - Wniebowstąpienie Chrystusa"
+  - "3. tajemnica chwalebna - Zesłanie Ducha Świętego"
+  - "4. tajemnica chwalebna - Wniebowzięcie Najświętszej Maryi Panny"
+  - "5. tajemnica chwalebna - Ukoronowanie Maryi na Królową nieba i ziemi"

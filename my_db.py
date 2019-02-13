@@ -102,7 +102,7 @@ class Mystery(Base):
     name - Mystery name """
     __tablename__ = 'mysteries'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    name = Column(String(100))
     prayer = relationship('Prayer', uselist=False, back_populates='mystery')
 
 
