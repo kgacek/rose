@@ -1,83 +1,140 @@
-function genTable(data) {
-    var myTable = document.getElementById('myTable');
-    while (myTable.firstChild) {
-        myTable.removeChild(myTable.firstChild);
-    }
-    var row = document.createElement("TR");
-    var tbody = document.createElement("TBODY");
-    var thead = document.createElement("THEAD");
-    var cell = document.createElement("TH");
-    cell.innerText = "patron";
-    row.appendChild(cell);
-    cell = document.createElement("INPUT");
-    cell.name="user_id";
-    cell.value=fb_user_id;
-    cell.style.display = 'none';
-    row.appendChild(cell);
-    cell = document.createElement("TH");
-    cell.innerText = "nr taj.";
-    row.appendChild(cell);
-    thead.appendChild(row);
-    for (intention in data) {
-        row = document.createElement("TR");
-        cell = document.createElement("TD");
-        cell.innerText = intention;
-        cell.colSpan = "2";
-        row.appendChild(cell);
-        tbody.appendChild(row);
-        row = document.createElement("TR")
+function setMysteries(intention, rose) {
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_free_mysteries", {
+        rose: rose
+    }, function (data) {
+        var select = document.getElementById(intention + "_mystery");
+        while (select.firstChild) {
+            select.removeChild(select.firstChild);
+        }
+        select.name = intention + "_mystery";
+        for (var i = 0; i < data.length; i++) {
+            var option = document.createElement('option');
+            option.value = data[i];
+            option.text = data[i];
+            select.appendChild(option);
+        }
+    });
 
+}
+function genTable(data) {
+    var myForm = document.getElementById('myForm');
+    while (myForm.firstChild) {
+        myForm.removeChild(myForm.firstChild);
+    }
+    var head = document.createElement("INPUT");
+    head.name="user_id";
+    head.value=fb_user_id;
+    head.style.display = 'none';
+    myForm.appendChild(head)
+    head = document.createElement("INPUT");
+    head.name="refresh_url";
+    head.value="https://kgacek.pythonanywhere.com/roses";
+    head.style.display = 'none';
+    myForm.appendChild(head)
+
+    for (intention in data) {
+        var fieldset = document.createElement("FIELDSET");
+        var container = document.createElement("DIV");
+        container.className='formContainer';
+        head = document.createElement("LEGEND");
+        head.innerText = intention;
+        fieldset.appendChild(head);
+        head = document.createElement("LABEL");
+        head.innerText='Patron Róży:';
+        head.className='form';
+        container.appendChild(head);
         var select = document.createElement('select');
         select.name=intention;
-        select.style.width= '100%';
+        select.onchange= function (){setMysteries(this.name, this.value);};
         for (rose in data[intention]) {
             var option = document.createElement('option');
             option.value = data[intention][rose];
             option.text = data[intention][rose];
             select.appendChild(option);
         }
-        cell = document.createElement("TD");
-        cell.appendChild(select);
-        row.appendChild(cell);
-        cell = document.createElement("TD");
-        var x = document.createElement("INPUT");
-        x.setAttribute("type", "number");
-        x.setAttribute("maxlength", '2');
-        x.style.width = "3em";
-        x.min='1';
-        x.max='20';
-        x.required = true;
-        x.name=intention+"_mystery";
-        cell.appendChild(x);
-        row.appendChild(cell);
-        tbody.appendChild(row);
-
+        container.appendChild(select);
+        fieldset.appendChild(container);
+        container = document.createElement("DIV");
+        container.className='formContainer';
+        head = document.createElement("LABEL");
+        head.innerText='Tajemnica:';
+        head.className='form';
+        container.appendChild(head);
+        select = document.createElement('select');
+        select.id=intention + "_mystery";
+        container.appendChild(select);
+        fieldset.appendChild(container);
+        myForm.appendChild(fieldset);
+        setMysteries(intention, data[intention][0])
     }
-    myTable.appendChild(thead);
-    myTable.appendChild(tbody);
+    var btn = document.createElement('BUTTON');
+    btn.innerText = "Zapisz mnie";
+    btn.className = "myButton";
+    myForm.appendChild(btn);
+
 }
-
-
-function genDivPrayer(data){
-    var div = document.createElement('DIV')
-    div.innerText= 'konczy sie : ' + data['ends'] + ' aktualnie: ' + data['current'] + ' potem: ' + data['next'] + ' status: ' + data['next_status']
-    return div
+function genUlPrayer(data){
+    var ul = document.createElement('UL');
+    var li = document.createElement('LI');
+    if(data['next_status'] === 'TO_APPROVAL')
+        var _class= "warning";
+    else if (data['next_status'] === 'APPROVED')
+        var _class= "approved";
+    li.innerText='aktualna tajemnica:  '+ data['current'];
+    li.className= "approved";
+    ul.appendChild(li);
+    li = document.createElement('LI');
+    li.innerText='następna tajemnica:  ' + data['next'];
+    li.className= _class;
+    ul.appendChild(li);
+    li = document.createElement('LI');
+    li.innerText='zmiana nastąpi:  ' + data['ends'];
+    li.className= _class;
+    ul.appendChild(li);
+    return ul;
 }
 
 function user_prayers() {
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_prayers", {
         user_id: fb_user_id
     }, function (data) {
-        var prayers = document.getElementById('prayers')
+        var prayers = document.getElementById('prayers');
         while (prayers.firstChild) {
             prayers.removeChild(prayers.firstChild);
         }
         if(Object.keys(data).length > 0){
-            for (patron in data){
-                console.log(patron)
-                prayers.appendChild(genDivPrayer(data[patron]))
+            var ul = document.createElement('UL')
+            var approve_needed=false;
+            for (var patron in data){
+                console.log(patron);
+                var li = document.createElement('LI')
+                li.innerText=patron;
+                li.appendChild(genUlPrayer(data[patron]));
+                ul.appendChild(li);
+                if(data[patron]['next_status'] === 'TO_APPROVAL')
+                    approve_needed = true;
             }
+            prayers.appendChild(ul);
+            var btn = document.createElement('BUTTON');
+            if (approve_needed)
+                btn.innerText = "Potwierdzam uczestnictwo w przyszłym miesiącu";
+            else {
+                btn.innerText = "Nie możesz jeszcze potwierdzić";
+                btn.disabled = true;
+            }
+            btn.className = "myButton";
+            btn.name = 'user_id';
+            btn.value = fb_user_id;
+            btn.setAttribute("form", "userSub");
+            prayers.appendChild(btn)
         }
+        else{
+        var notification = document.createElement('p')
+        notification.className='warning'
+        notification.innerText='Nie zostałeś jeszcze przypisany do żadnej Róży. Przydział może nastąpić nawet do 24h po zatwierdzeniu konta przez Administratora, proszę czekać!'
+        prayers.appendChild(notification)
+        }
+
     });
 
 }
@@ -100,16 +157,9 @@ function already_user() {
         }
         else if (Object.keys(data['already_assigned']).length > 0) {
             document.getElementById('statusTitle').innerText = 'Masz już przypisane tajemnice dla wszystkich Intencji w których się modlisz.';
-            setTimeout(function () {
-                MessengerExtensions.requestCloseBrowser();
-            }, 8000);
-
         }
         else{
             document.getElementById('statusTitle').innerText = 'Nie Jesteś zapisany do żadnej Intencji.';
-            setTimeout(function () {
-                MessengerExtensions.requestCloseBrowser();
-            }, 3000);
         }
 
     });

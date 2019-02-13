@@ -12,15 +12,18 @@
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
 <div id="status" class="desc bar">
-    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
+    <h3>Twoje Intencje</h3>
+    <p id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</p>
     <div id="divTable"></div>
 </div>
 <div  class="desc bar">
-    <h3>Wybierz Intencje, w których chcesz się modlić</h3>
+    <h3>Rejestracja Intencji</h3>
+    <p>W tym miejscu możesz zapisać się do nowych intencji.</p>
     <form id="newIntention" action="https://kgacek.pythonanywhere.com/_add_intention" method="post">
+        <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/intentions" style='display: none'>
         <div id="newIntentionDiv"></div>
         <br>
-        <input type="submit" value="Dodaj mnie" class="myButton" style="float: right;"><br>
+        <input type="submit" value="Dodaj" class="myButton"><br>
     </form>
 </div>
 <div id="choice_buttons" ></div>
