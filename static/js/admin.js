@@ -32,7 +32,7 @@ function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
         fb_user_id = response.authResponse["userID"];
-        if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
+        if (['2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
             $.getJSON("https://kgacek.pythonanywhere.com/_new_users",
                 function (data) {
