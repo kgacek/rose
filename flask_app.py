@@ -15,15 +15,18 @@ Flask application
 with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
+with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
+    PASSWORD = f.readline().strip()
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address']
+app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].format(pass=PASSWORD)
 flask_db.db.init_app(app)
 bot = Bot(CONFIG['token']['test'])
 
 
 def _log(msg):
     with open(CONFIG['log']['flask_app'], 'a+') as f:
-        f.write(str(msg))
+        f.write(str(msg) + '\n')
 
 
 @app.route('/')
@@ -56,12 +59,16 @@ def get_new_users():
         return redirect(url_for('index'))
 
 
-@app.route('/_add_intention', methods=['GET', 'POST'])
-def add_intention():
-    print('adding intention')
+@app.route('/_process_intention', methods=['GET', 'POST'])
+def process_intention():
     data = request.form
     print(str(data))
-    flask_db.add_user_intention(data)
+    if data['action'] == 'Dodaj':
+        print('adding intention')
+        flask_db.add_user_intention(data)
+    elif data['action'] == 'Usuń':
+        print('removing intention')
+        flask_db.remove_user_intention(data)
     return redirect(request.form['refresh_url'])
 
 

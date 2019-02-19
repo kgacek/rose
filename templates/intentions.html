@@ -19,11 +19,11 @@
 <div  class="desc bar">
     <h3>Rejestracja Intencji</h3>
     <p>W tym miejscu możesz zapisać się do nowych intencji.</p>
-    <form id="newIntention" action="https://kgacek.pythonanywhere.com/_add_intention" method="post">
+    <form id="newIntention" action="https://kgacek.pythonanywhere.com/_process_intention" method="post" accept-charset="UTF-8">
         <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/intentions" style='display: none'>
         <div id="newIntentionDiv"></div>
-        <br>
-        <input type="submit" value="Dodaj" class="myButton"><br>
+        <input type="submit" name="action" value="Dodaj" class="myButton">
+        <input type="submit" name="action" value="Usuń" class="myButton">
     </form>
 </div>
 <div id="choice_buttons" ></div>

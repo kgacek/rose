@@ -18,15 +18,17 @@ Module for handling actions  which should be invoked outside Flask - periodic ta
 
 with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
+with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
+    PASSWORD = f.readline().strip()
 
 bot = Bot(CONFIG['token']['test'])
-engine = create_engine(CONFIG['sql']['rose']['full_address'], pool_recycle=280, pool_size=3, max_overflow=0, echo=True)
+engine = create_engine(CONFIG['sql']['rose']['full_address'].format(pass=PASSWORD), pool_recycle=280, pool_size=3, max_overflow=0, echo=True)
 Session = sessionmaker(bind=engine)
 
 
 def _log(msg):
     with open(CONFIG['log']['manager'], 'a+') as log:
-        log.write(str(msg))
+        log.write(str(msg) + '\n')
 
 
 def fill_db():
@@ -46,7 +48,6 @@ def fill_db():
         for patron in in_data['roses'][intention]:
             pat = Patron(name=patron)
             rose = Rose(intention_id=intention,
-                        started=date.today().replace(day=1),
                         ends=date.today().replace(day=1) + relativedelta(months=1),
                         patron=pat)
             session.add(rose)
@@ -57,7 +58,6 @@ def fill_db():
 
     for el in in_data['mysteries']:
         session.add(Mystery(name=el))
-
     session.commit()
 
 
@@ -86,7 +86,6 @@ class Manager(object):
         expired_roses = self.session.query(Rose).filter(Rose.ends == date.today()).all()
         msg = {}
         for rose in expired_roses:
-            rose.started = rose.ends
             rose.ends = rose.ends + relativedelta(months=1)
             for association in rose.users:
                 if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
@@ -113,13 +112,14 @@ class Manager(object):
         :param user:  User object
         :param intention: Intention object"""
         _log('creating new rose..')
-        patron = self.session.query(Patron).filter(Patron.rose.is_(None)).first()  # todo handling case when no patrons left
+        patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
         _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
-                    started=date.today(),
                     ends=date.today() + relativedelta(months=1),
                     patron_id=patron.id)
         asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
+        self.session.add(asso)
+        self.session.commit()
         new = Prayer(mystery_id=1, ends=rose.ends)
         asso.prayers.append(new)
         self.session.commit()
@@ -148,17 +148,20 @@ class Manager(object):
         free_users = self.session.query(User).filter_by(status="VERIFIED").all()
         #  ToDo maybe there is a better way to find people who don't have roses assigned for all intentions
         free_users.extend([user for user in active_users if len(user.roses) < len(user.intentions)])
-        self.session.query()
         for user in free_users:
+            user_roses_ids = [asso.rose_id for asso in user.roses]
             for intention in user.intentions:
-                roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
-                not_full_roses = [rose for rose in roses_candidates if len(rose.users) < 20]
-                if not_full_roses:
-                    asso = AssociationUR(status="ACTIVE", rose=not_full_roses[0], user=user)
-                    new = Prayer(mystery_id=self.get_free_mystery(not_full_roses[0]), ends=not_full_roses[0].ends)
-                    asso.prayers.append(new)
-                else:
-                    self.create_new_rose(user, intention)
+                if not [rose for rose in intention.roses if rose.id in user_roses_ids]:
+                    roses_candidates = self.session.query(Rose).filter_by(intention_id=intention.id).all()
+                    for rose in roses_candidates:
+                        free_mystery = self.get_free_mystery(rose)
+                        if free_mystery != 0:
+                            asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
+                            new = Prayer(mystery_id=free_mystery, ends=rose.ends)
+                            asso.prayers.append(new)
+                            break
+                    else:
+                        self.create_new_rose(user, intention)
             user.status = "ACTIVE"
             self.session.commit()
 

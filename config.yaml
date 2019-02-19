@@ -12,7 +12,7 @@ admins: # should be list of admins or move this somewhere else (db?)
 sql:
   rose:
     full_address:
-      "mysql://kgacek:kaszanka12@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
+      "mysql://kgacek:{pass}@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
 log:
   manager:
     '/home/kgacek/app_logs/manager.log'
@@ -26,4 +26,4 @@ inputs:
   test:
     'input_test.yaml'
 reminder_offset:
-  3
+  7
