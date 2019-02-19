@@ -20,7 +20,7 @@ db = SQLAlchemy(metadata=metadata)
 
 def _log(msg):
     with open(CONFIG['log']['flask_db'], 'a+') as log:
-        log.write(str(msg))
+        log.write(str(msg) + '\n')
 
 
 def _get_user(user_id, create=True, status="NEW"):
@@ -67,6 +67,20 @@ def add_user_intention(data):
     return [intention.name for intention in user.intentions]
 
 
+def remove_user_intention(data):
+    """removes user intention.
+    :param data: dict, {user_id: <str>, intention_name: <str>}
+    :return list of user intentions
+    """
+    user = _get_user(data['user_id'])
+    intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
+    print('removing: ' + intention.name)
+    if intention in user.intentions:
+        unsubscribe_user(user_id=user.global_id, intention=intention)
+    db.session.commit()
+    return [intention.name for intention in user.intentions]
+
+
 def get_user_prayers(user_id):
     """Gets user prayers and status
     :param user_id: User.global_id
@@ -105,7 +119,7 @@ def get_user_intentions(user_psid, user_id):
     for intention in user.intentions:
         intentions[intention.name] = []
         for rose in intention.roses:
-            if rose.id in [rose.rose_id for rose in user.roses]:
+            if rose.id in [rose.rose_id for rose in user.roses if rose.status != 'EXPIRED']:
                 del intentions[intention.name]
                 already_assigned[intention.name] = rose.patron.name
                 break
@@ -120,16 +134,19 @@ def set_user_roses(data):
     :param data: dict, {user_id: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_name}"""
     user = _get_user(data['user_id'])
     user.status = "ACTIVE"
-    print(str(user.roses))
-    for intention in user.intentions:
-        if intention.name in data:
-            for rose in intention.roses:
-                if rose.patron.name == data[intention.name]:
-                    asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
-                    mystery = db.session.query(Mystery).filter_by(name=data[intention.name + '_mystery']).first()
-                    prayer = Prayer(mystery=mystery, ends=rose.ends)
-                    asso.prayers.append(prayer)
-                    db.session.add(asso)
+    _log('setting user roses:')
+    _log(user.roses)
+    mysteries = {k.replace('_mystery', ''): v for (k, v) in data.items() if "_mystery" in k}
+    _log(mysteries)
+    intentions = {k: v for (k, v) in data.items() if "_mystery" not in k and 'user_id' != k and k != 'refresh_url'}
+    _log(intentions)
+    for intention, rose in intentions.items():
+        rose_obj = db.session.query(Rose).join(Intention).join(Patron).filter(Intention.name == intention).filter(Patron.name == rose).first()
+        asso = AssociationUR(status="ACTIVE", rose=rose_obj, user=user)
+        mystery = db.session.query(Mystery).filter_by(name=mysteries[intention]).first()
+        prayer = Prayer(mystery_id=mystery.id, ends=rose_obj.ends)
+        asso.prayers.append(prayer)
+        db.session.add(asso)
     db.session.commit()
     return True
 
@@ -186,15 +203,16 @@ def subscribe_user(user_id=None, user_psid=None):
     if user_id:
         user_asso = db.session.query(AssociationUR).filter_by(user_id=user_id).filter_by(status='ACTIVE').all()
     else:
-        user_asso = db.session.query(AssociationUR).filter(AssociationUR.user.psid == user_psid).filter_by(status='ACTIVE').all()
+        user_asso = db.session.query(AssociationUR).join(User).filter(User.psid == user_psid).filter_by(status='ACTIVE').all()
     expiring_association = [asso for asso in user_asso if
                             asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()]
     for association in expiring_association:
-        association.status = 'SUBSCRIBED'
+        if association.status == 'ACTIVE':
+            association.status = 'SUBSCRIBED'
     db.session.commit()
 
 
-def unsubscribe_user(user_id=None, user_psid=None):
+def unsubscribe_user(user_id=None, user_psid=None, intention=None):
     """Unsubscribe User from all activities (on user demand).
     STATUS CHANGE: User status will be set to OBSOLETE.
     User Intentions and user roses list will be cleared.
@@ -204,8 +222,19 @@ def unsubscribe_user(user_id=None, user_psid=None):
         user = _get_user(user_id)
     else:
         user = db.session.query(User).filter(User.psid == user_psid).first()
-    user.intentions.clear()
-    for asso in db.session.query(AssociationUR).filter_by(user_id=user_id).all():
-        db.session.delete(asso)
-    user.status = "OBSOLETE"
-    db.session.commit()
+    if user:
+        if intention:
+            user.intentions.remove(intention)
+            asso_u_r = [asso for asso in db.session.query(AssociationUR).filter_by(user_id=user.global_id).all() if asso.rose in intention.roses]
+        else:
+            user.intentions.clear()
+            asso_u_r = db.session.query(AssociationUR).filter_by(user_id=user.global_id).all()
+
+        for asso in asso_u_r:
+            asso.prayers.clear()
+            db.session.delete(asso)
+        if not user.intentions:
+            user.status = "OBSOLETE"
+        db.session.commit()
+    else:
+        _log("user have to connect accounts!")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import MetaData, Column, Date, String, Integer, ForeignKey, Table
+from sqlalchemy import MetaData, Column, Date, String, Integer, ForeignKey, Table, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -89,7 +89,6 @@ class Rose(Base):  # ToDo consider adding Rose related numbers
     id = Column(Integer, primary_key=True)
     patron_id = Column(Integer, ForeignKey("patrons.id"))
     intention_id = Column(String(60), ForeignKey("intentions.id"))
-    started = Column(Date)  # ToDo maybe it can be removed?
     ends = Column(Date)
     patron = relationship("Patron", back_populates='rose')
     intention = relationship("Intention", back_populates="roses")
@@ -117,6 +116,7 @@ class Prayer(Base):
     id = Column(Integer, primary_key=True)
     ends = Column(Date)
     mystery_id = Column(Integer, ForeignKey("mysteries.id"))
-    user_id = Column(String(50), ForeignKey('association_u_r.user_id'))
-    rose_id = Column(Integer, ForeignKey('association_u_r.rose_id'))
+    user_id = Column(String(50))
+    rose_id = Column(Integer)
     mystery = relationship('Mystery', back_populates='prayer')
+    __table_args__ = (ForeignKeyConstraint(['rose_id', 'user_id'], ['association_u_r.rose_id', 'association_u_r.user_id']),)
