@@ -1,3 +1,9 @@
+body{
+background: -moz-linear-gradient(left, #F4E7CA 0%, #FFFFFF 50%, #F4ECCE 100%);
+background: -webkit-linear-gradient(left, #F4E7CA 0%, #FFFFFF 50%, #F4ECCE 100%);
+background: linear-gradient(to right, #F4E7CA 0%, #FFFFFF 50%, #F4ECCE 100%);
+}
+
 .myButton {
 	-moz-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
 	-webkit-box-shadow:inset 0px 1px 0px 0px #f7c5c0;
@@ -23,6 +29,10 @@
 	padding:6px 24px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #b23e35;
+	margin-right: 25px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px:
 }
 .myButton:hover {
 	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e4685d), color-stop(1, #fc8d83));
@@ -55,7 +65,7 @@
 	-moz-border-radius:3px;
 	-webkit-border-radius:3px;
 	border-radius:3px;
-	border:1px solid #dcdcdc;
+	border:1px solid rgb(67,200,249);
 	display:inline-block;
 	cursor:pointer;
 	color:#666666;
@@ -66,7 +76,8 @@
 	padding:8px 24px;
 	text-decoration:none;
 	text-shadow:0px 1px 0px #ffffff;
-	margin-right:8px
+	margin-right:8px;
+	margin-bottom: 20px;
 }
 .navButton:hover {
 	background-color:transparent;
@@ -122,7 +133,7 @@ margin-bottom: 10px;
 
 }
 div.bar{
-max-width: 800px;
+max-width: 750px;
 margin: auto;
 }
 
@@ -130,26 +141,39 @@ margin: auto;
 div.desc{
 margin-top: 25px;
 margin-bottom: 25px;
-border: 1px solid #0F8CCB;
-border-radius: 17px;
-background-color: #D8E8F5;
+border: 1px solid rgb(67,200,249);
+background-color: #0bcbff14;
 padding: 25px;
+max-width: 750px
 }
 
-div.title{
-font-family: Georgia, serif;
-height: 70px;
-background-color: #A3DDFF;
-border: 2px solid #0F8CCB;
-border-radius: 17px;
-padding: 25px;
-font-size: 25px;
-letter-spacing: 2px;
-word-spacing: 2px;
-color: #000000;
-text-align: center;
-clear: both;
+div.header{
+border-top: 1px solid rgb(67,200,249);
+border-bottom: 1px solid rgb(67,200,249);
 }
+
+.title{
+background: url("leftTitle.jpg") no-repeat left top, url("rightTitle.jpg") no-repeat right top;
+padding: 10px;
+clear: both;
+height: 180px;
+background-color: rgb(190,232,248);
+}
+
+.title p {
+margin-top:60px;
+font-family:  Arial, Helvetica, sans-serif;
+font-size: 40px;
+letter-spacing: 3px;
+word-spacing: 3px;
+color: #FFEDB5;
+text-align: center;
+}
+.title img {
+margin: auto;
+display: block;
+}
+
 
 #tf {
 font-family: "Times New Roman", Times, serif;
