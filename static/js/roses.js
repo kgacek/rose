@@ -107,8 +107,11 @@ function user_prayers() {
             var approve_needed=false;
             for (var patron in data){
                 console.log(patron);
-                var li = document.createElement('LI')
-                li.innerText=patron;
+                var li = document.createElement('LI');
+                var span = document.createElement('SPAN');
+                span.title=data[patron]['intention'];
+                span.innerText=patron;
+                li.appendChild(span)
                 li.appendChild(genUlPrayer(data[patron]));
                 ul.appendChild(li);
                 if(data[patron]['next_status'] === 'TO_APPROVAL')

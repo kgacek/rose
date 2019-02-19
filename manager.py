@@ -90,7 +90,11 @@ class Manager(object):
             for association in rose.users:
                 if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
                     association.status = "ACTIVE"
-                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1, ends=rose.ends)
+                    if rose.intention_id == "642811842749838":  # Psałterz
+                        next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
+                    else:
+                        next_id = association.prayers[-1].mystery_id % 20 + 1
+                    new = Prayer(mystery_id=next_id, ends=rose.ends)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
                     association.status = "EXPIRED"
@@ -120,7 +124,10 @@ class Manager(object):
         asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
         self.session.add(asso)
         self.session.commit()
-        new = Prayer(mystery_id=1, ends=rose.ends)
+        if rose.intention_id == "642811842749838":  # Psałterz
+            new = Prayer(mystery_id=21, ends=rose.ends)
+        else:
+            new = Prayer(mystery_id=1, ends=rose.ends)
         asso.prayers.append(new)
         self.session.commit()
 
@@ -134,7 +141,11 @@ class Manager(object):
             for prayer in asso.prayers:
                 if prayer.ends == rose.ends:
                     current_mysteries.append(prayer.mystery_id)
-        for i in range(1, 21):
+        if rose.intention_id == "642811842749838":  # Psałterz
+            r = (21, 171)
+        else:
+            r = (1, 21)
+        for i in range(*r):
             if i not in current_mysteries:
                 _log("mystery nr: {}".format(str(i)))
                 return i

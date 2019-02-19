@@ -84,18 +84,21 @@ def remove_user_intention(data):
 def get_user_prayers(user_id):
     """Gets user prayers and status
     :param user_id: User.global_id
-    :return dict, {<patron name> : {'ends': <cycle end>, 'current':<current mystery>, next:<next mystery>, next_status: <'NOT_ACTIVE','TO_APPROVAL','APPROVED'>}..}"""
+    :return dict, {<patron name> : {'ends': <cycle end>, 'current':<current mystery>, next:<next mystery>, next_status: <'NOT_ACTIVE','TO_APPROVAL','APPROVED'>, intention: name}..}"""
     user = _get_user(user_id)
     prayers = {}
     for asso in user.roses:
         if asso.status != 'EXPIRED':
             current_mystery = asso.prayers[-1].mystery
-            next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 20 + 1).first()
+            if asso.rose.intention_id == "642811842749838":  # Psałterz
+                next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 170 + (current_mystery.id // 170)*20 + 1).first()
+            else:
+                next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 20 + 1).first()
             if asso.status == 'ACTIVE':
                 status = 'TO_APPROVAL' if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today() else 'NOT_ACTIVE'
             else:
                 status = 'APPROVED'
-            prayers[asso.rose.patron.name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status}
+            prayers[asso.rose.patron.name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name}
     _log(prayers)
     return prayers
 
@@ -154,9 +157,7 @@ def set_user_roses(data):
 def get_current_mysteries(rose):
     """Gets all mysteries currently used in given rose
     :return list of mysteries obj"""
-    if not isinstance(rose, Rose):
-        rose = db.session.query(Patron).filter_by(name=rose).first().rose
-    _log("getting first all free mysteries in rose : {}".format(rose.patron.name))
+    _log("getting all free mysteries in rose : {}".format(rose.patron.name))
     current_mysteries = []
     for asso in rose.users:
         for prayer in asso.prayers:
@@ -168,9 +169,14 @@ def get_current_mysteries(rose):
 def get_free_mysteries(rose):
     """Gets all mysteries currently free in given rose
     :return list of free mysteries obj"""
+    if not isinstance(rose, Rose):
+        rose = db.session.query(Patron).filter_by(name=rose).first().rose
     current_m = get_current_mysteries(rose)
     all_m = db.session.query(Mystery).all()
-    return [el.name for el in all_m if el not in current_m]
+    if rose.intention_id == "642811842749838":  # Psałterz
+        return [el.name for el in all_m if el not in current_m and el.id > 20]
+    else:
+        return [el.name for el in all_m if el not in current_m and el.id <= 20]
 
 
 def set_user_verified(data):
