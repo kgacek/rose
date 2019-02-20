@@ -12,15 +12,14 @@ function updateNavbar(status){
     if (status === "connected" || status === "admin"){
         btn = document.createElement("a");
         btn.className = "navButton"
-        btn.href="https://kgacek.pythonanywhere.com/roses"
-        btn.innerText="Moje Róże"
-        bar.appendChild(btn)
-        btn = document.createElement("a");
-        btn.className = "navButton"
         btn.href="https://kgacek.pythonanywhere.com/intentions"
         btn.innerText="Moje Intencje"
         bar.appendChild(btn)
-
+        btn = document.createElement("a");
+        btn.className = "navButton"
+        btn.href="https://kgacek.pythonanywhere.com/roses"
+        btn.innerText="Moje Róże"
+        bar.appendChild(btn)
     }
     if (status === "admin"){
         btn = document.createElement("a");
