@@ -37,11 +37,11 @@ function LoginCallback(response) {
             $.getJSON("https://kgacek.pythonanywhere.com/_new_users",
                 function (data) {
                     if (Object.keys(data).length > 0) {
-                        document.getElementById('statusTitle').innerText = 'Jesteś Administratorem. Aktualnie oczekujący użytkownicy:';
+                        document.getElementById('statusTitle').innerText = 'Aktualnie oczekujący użytkownicy:';
                         document.getElementById('usersList').style.display = 'block';
                         genUsersList(data)
                     } else {
-                        document.getElementById('statusTitle').innerText = 'Jesteś Administratorem. Brak oczekujących użytkowników.';
+                        document.getElementById('statusTitle').innerText = 'Brak oczekujących użytkowników.';
                         document.getElementById('usersList').style.display = 'none';
 
                     }

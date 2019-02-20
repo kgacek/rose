@@ -46,7 +46,8 @@ def roses():
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    status_table = flask_db.get_all_status()
+    return render_template('admin.html', status_table=status_table)
 
 
 @app.route('/_new_users', methods=['GET', 'POST'])

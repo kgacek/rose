@@ -214,3 +214,30 @@ padding-right: 10px;
 select{
 width: 400px;
 }
+
+table.statTable {
+  font-family: "Times New Roman", Times, serif;
+  border: 1px solid #515151;
+  width: 100%;
+  text-align: center;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+table.statTable td, table.statTable th {
+  border: 1px solid #515151;
+  padding: 3px 2px;
+}
+table.statTable tbody td {
+  font-size: 13px;
+}
+table.statTable thead {
+  background: #14ACF2;
+}
+table.statTable thead th {
+  font-size: 17px;
+  font-weight: bold;
+  text-align: center;
+}
+table.statTable tfoot td {
+  font-size: 14px;
+}

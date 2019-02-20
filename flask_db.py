@@ -17,6 +17,8 @@ with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
 
 db = SQLAlchemy(metadata=metadata)
 
+STAT = {"ACTIVE": 'Aktywny', "SUBSCRIBED": 'Potwierdzony', 'EXPIRED': "Wypisany"}
+
 
 def _log(msg):
     with open(CONFIG['log']['flask_db'], 'a+') as log:
@@ -130,6 +132,24 @@ def get_user_intentions(user_psid, user_id):
     print(str(intentions))
     print(str(already_assigned))
     return {'intentions': intentions, 'active': user.status != 'NEW', 'already_assigned': already_assigned}
+
+
+def get_all_status():
+    """Gets status of all roses across all intentions
+    return dict, {intention:{rose:{user:(status,current mystery}}}"""
+    intentions = db.session.query(Intention).all()
+    stat = {}
+    for intention in intentions:
+        stat[intention.name] = {}
+        for rose in intention.roses:
+            if rose.users:
+                stat[intention.name][rose.patron.name] = {}
+                for asso in rose.users:
+                    prayer = asso.prayers[-1].mystery.name if asso.prayers else '--'
+                    stat[intention.name][rose.patron.name][asso.user.fullname] = (STAT.get(asso.status,''), prayer)
+        if not stat[intention.name]:
+            del stat[intention.name]
+    return stat
 
 
 def set_user_roses(data):
