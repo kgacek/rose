@@ -20,6 +20,7 @@ with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 flask_db.db.init_app(app)
 bot = Bot(CONFIG['token']['test'])
 
