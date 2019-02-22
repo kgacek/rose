@@ -1,3 +1,14 @@
+function showIntentions(intention) {
+    var divTables = document.getElementById("intentionsStatus");
+    var childTables = divTables.getElementsByTagName("DIV");
+    for (var i=0;i<childTables.length;i++){
+    if (childTables[i].id === intention || intention === 'all')
+        childTables[i].style.display="block";
+    else
+        childTables[i].style.display="none";
+    }
+}
+
 function genUsersList(data) {
     var div = document.getElementById('divUsersList');
     while (div.firstChild) {

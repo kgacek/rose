@@ -134,6 +134,10 @@ def get_user_intentions(user_psid, user_id):
     return {'intentions': intentions, 'active': user.status != 'NEW', 'already_assigned': already_assigned}
 
 
+def status_sort(elem):
+    return elem[-1]
+
+
 def get_all_status():
     """Gets status of all roses across all intentions
     return dict, {intention:{rose:{user:(status,current mystery}}}"""
@@ -143,10 +147,11 @@ def get_all_status():
         stat[intention.name] = {}
         for rose in intention.roses:
             if rose.users:
-                stat[intention.name][rose.patron.name] = {}
+                stat[intention.name][rose.patron.name] = []
                 for asso in rose.users:
-                    prayer = asso.prayers[-1].mystery.name if asso.prayers else '--'
-                    stat[intention.name][rose.patron.name][asso.user.fullname] = (STAT.get(asso.status,''), prayer)
+                    mystery = asso.prayers[-1].mystery if asso.prayers else '--'
+                    stat[intention.name][rose.patron.name].append((asso.user.fullname, STAT.get(asso.status, ''), mystery.name, mystery.id))
+                stat[intention.name][rose.patron.name].sort(key=status_sort)
         if not stat[intention.name]:
             del stat[intention.name]
     return stat
