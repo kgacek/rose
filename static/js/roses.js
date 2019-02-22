@@ -134,7 +134,7 @@ function user_prayers() {
         else{
         var notification = document.createElement('p')
         notification.className='warning'
-        notification.innerText='Nie zostałeś jeszcze przypisany do żadnej Róży. Przydział może nastąpić nawet do 24h po zatwierdzeniu konta przez Administratora, proszę czekać!'
+        notification.innerText='Dodaj Tajemnice które odmawiasz lub zaczekaj, jeśli nie brałeś wcześniej udziału w Różach - aplikacja sama je przydzieli.'
         prayers.appendChild(notification)
         }
 
