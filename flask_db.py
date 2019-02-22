@@ -25,7 +25,7 @@ def _log(msg):
         log.write(str(msg) + '\n')
 
 
-def _get_user(user_id, create=True, status="NEW"):
+def _get_user(user_id, create=True, status="VERIFIED"):
     """Gets user db object for given user_id. creates it if don't exist yet.
     :return User object"""
     user = db.session.query(User).filter_by(global_id=user_id).first()
