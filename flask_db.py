@@ -150,7 +150,7 @@ def get_all_status():
                 stat[intention.name][rose.patron.name] = []
                 for asso in rose.users:
                     mystery = asso.prayers[-1].mystery if asso.prayers else '--'
-                    stat[intention.name][rose.patron.name].append((asso.user.fullname, STAT.get(asso.status, ''), mystery.name, mystery.id))
+                    stat[intention.name][rose.patron.name].append((asso.user.fullname, STAT.get(asso.status, ''), mystery.name, asso.user.global_id, mystery.id))
                 stat[intention.name][rose.patron.name].sort(key=status_sort)
         if not stat[intention.name]:
             del stat[intention.name]

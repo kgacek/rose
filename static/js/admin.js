@@ -1,6 +1,11 @@
 function showIntentions(intention) {
     var divTables = document.getElementById("intentionsStatus");
     var childTables = divTables.getElementsByTagName("DIV");
+    var inputs = divTables.getElementsByTagName("INPUT");
+    for (var i=0;i<inputs.length;i++){
+        if (inputs[i].type === 'checkbox')
+                inputs[i].checked=false;
+    }
     for (var i=0;i<childTables.length;i++){
     if (childTables[i].id === intention || intention === 'all')
         childTables[i].style.display="block";
@@ -54,8 +59,8 @@ function LoginCallback(response) {
                     } else {
                         document.getElementById('statusTitle').innerText = 'Brak oczekujących użytkowników.';
                         document.getElementById('usersList').style.display = 'none';
-
                     }
+                    document.getElementById('admin_id').value=fb_user_id;
                 });
         } else {
             window.location.replace("https://kgacek.pythonanywhere.com/");

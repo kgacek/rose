@@ -74,6 +74,19 @@ def process_intention():
     return redirect(request.form['refresh_url'])
 
 
+@app.route('/_remove_users_intention', methods=['GET', 'POST'])
+def remove_users_intention():
+    data = request.form
+    print(str(data))
+    admin = data['admin_id']
+    _log('USER REMOVE: removing users from intentions by: {}'.format(admin))
+    for key, val in data.items():
+        if 'admin_id' != key:
+            _log("--- removing {} from {}".format(key, val))
+            flask_db.remove_user_intention({'user_id': key, 'intention_name': val})
+    return redirect(url_for('admin'))
+
+
 @app.route('/_get_all_intentions')
 def get_all_intentions():
     user_id = request.args.get('user_id')
