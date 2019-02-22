@@ -195,6 +195,31 @@ class Manager(object):
             msg += str(bot.get_user_info(user_psid))
         _log("sending notification about expired users:\n {}".format(msg))  # todo implement real sending
 
+    def unsubscribe_user(self, user_id=None, intention_name=None):
+        """Unsubscribe User from all activities .
+        STATUS CHANGE: User status will be set to OBSOLETE.
+        User Intentions and user roses list will be cleared.
+        User Can subscribe again to any intentions he want, bot no confirmation from admins will be needed in this case.
+        """
+        user = self.session.query(User).filter_by(global_id=user_id).first()
+        if user:
+            if intention_name:
+                intention = self.session.query(Intention).filter(Intention.name == intention_name).first()
+                user.intentions.remove(intention)
+                asso_u_r = [asso for asso in self.session.query(AssociationUR).filter_by(user_id=user.global_id).all() if asso.rose in intention.roses]
+            else:
+                user.intentions.clear()
+                asso_u_r = self.session.query(AssociationUR).filter_by(user_id=user.global_id).all()
+
+            for asso in asso_u_r:
+                asso.prayers.clear()
+                self.session.delete(asso)
+            if not user.intentions:
+                user.status = "OBSOLETE"
+            self.session.commit()
+        else:
+            _log("user have to connect accounts!")
+
 
 def main():
     manager = Manager()
