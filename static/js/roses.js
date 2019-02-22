@@ -1,19 +1,29 @@
-function setMysteries(intention, rose) {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_free_mysteries", {
-        rose: rose
-    }, function (data) {
-        var select = document.getElementById(intention + "_mystery");
-        while (select.firstChild) {
-            select.removeChild(select.firstChild);
-        }
-        select.name = intention + "_mystery";
-        for (var i = 0; i < data.length; i++) {
-            var option = document.createElement('option');
-            option.value = data[i];
-            option.text = data[i];
-            select.appendChild(option);
-        }
-    });
+function setMysteries(intentionSel, rose) {
+    var select = document.getElementById(intentionSel.id + "_mystery");
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+    if (rose === 'blank'){
+        intentionSel.removeAttribute("name");
+        select.removeAttribute("name");
+        var option = document.createElement('option');
+        option.text = "Najpierw wybierz Patrona";
+        select.appendChild(option);
+    }
+    else{
+        $.getJSON("https://kgacek.pythonanywhere.com/_get_free_mysteries", {
+            rose: rose
+        }, function (data) {
+            intentionSel.name = intentionSel.id;
+            select.name = intentionSel.id + "_mystery";
+            for (var i = 0; i < data.length; i++) {
+                var option = document.createElement('option');
+                option.value = data[i];
+                option.text = data[i];
+                select.appendChild(option);
+            }
+        });
+    }
 
 }
 function genTable(data) {
@@ -44,10 +54,14 @@ function genTable(data) {
         head.className='form';
         container.appendChild(head);
         var select = document.createElement('select');
-        select.name=intention;
-        select.onchange= function (){setMysteries(this.name, this.value);};
+        select.id=intention;
+        select.onchange= function (){setMysteries(this, this.value);};
+        var option = document.createElement('option');
+        option.text = 'Wybierz swojego Patrona';
+        option.value = 'blank';
+        select.appendChild(option);
         for (rose in data[intention]) {
-            var option = document.createElement('option');
+            option = document.createElement('option');
             option.value = data[intention][rose];
             option.text = data[intention][rose];
             select.appendChild(option);
@@ -62,10 +76,12 @@ function genTable(data) {
         container.appendChild(head);
         select = document.createElement('select');
         select.id=intention + "_mystery";
+        option = document.createElement('option');
+        option.text = 'Najpierw wybierz Patrona';
+        select.appendChild(option);
         container.appendChild(select);
         fieldset.appendChild(container);
         myForm.appendChild(fieldset);
-        setMysteries(intention, data[intention][0])
     }
     var btn = document.createElement('BUTTON');
     btn.innerText = "Zapisz mnie";
@@ -102,6 +118,7 @@ function user_prayers() {
         while (prayers.firstChild) {
             prayers.removeChild(prayers.firstChild);
         }
+        var notification = document.createElement('p')
         if(Object.keys(data).length > 0){
             var ul = document.createElement('UL')
             var approve_needed=false;
@@ -130,13 +147,13 @@ function user_prayers() {
             btn.value = fb_user_id;
             btn.setAttribute("form", "userSub");
             prayers.appendChild(btn)
+            notification.innerText='Pomyliłeś się? Wróć do zakładki "moje intencje", wybierz i usuń intencję w której zrobiłeś błąd - Będziesz mógł dodać ją jeszcze raz.'
         }
         else{
-        var notification = document.createElement('p')
         notification.className='warning'
         notification.innerText='Dodaj Tajemnice które odmawiasz lub zaczekaj, jeśli nie brałeś wcześniej udziału w Różach - aplikacja sama je przydzieli.'
-        prayers.appendChild(notification)
         }
+        prayers.appendChild(notification)
 
     });
 
