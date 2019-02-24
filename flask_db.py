@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import date, timedelta
 import yaml
 import os
+import re
 
 from my_db import metadata, User, Intention, Prayer, AssociationUR, Mystery, Patron, Rose
 
@@ -42,6 +43,11 @@ def connect_user_id(user_id, user_psid, username):
         user = _get_user(user_id)
         if user_psid:
             user.psid = user_psid
+        simillar_users = db.session.query(User).filter(User.fullname.like(username+'%')).all()
+        if simillar_users and not [el for el in simillar_users if user_id == el.global_id]:
+            true_simillar_users = [el for el in simillar_users if username == el.fullname or re.match(r'{}( - \d\d)'.format(username), el.fullname)]
+            if true_simillar_users:
+                username = '{username} - {number}'.format(username=username, number=str(len(true_simillar_users)).zfill(2))
         user.fullname = username
         db.session.commit()
 

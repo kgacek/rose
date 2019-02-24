@@ -22,10 +22,8 @@ function selectIntention(data) {
 }
 
 function IntentionForm(){
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_all_intentions", {
-        user_psid: fb_user_psid,
-        user_id: fb_user_id,
-    }, function (data) {
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_all_intentions",
+    function (data) {
         selectIntention(data);
     });
 }

@@ -87,13 +87,17 @@ def remove_users_intention():
     return redirect(url_for('admin'))
 
 
-@app.route('/_get_all_intentions')
-def get_all_intentions():
+@app.route('/_add_new_user')
+def add_new_user():
     user_id = request.args.get('user_id')
     user_psid = request.args.get('user_psid')
     if user_id:
         username = bot.get_user_info(user_id)['name']
         flask_db.connect_user_id(user_id, user_psid, username)
+
+
+@app.route('/_get_all_intentions')
+def get_all_intentions():
     return jsonify(flask_db.get_all_intentions())
 
 

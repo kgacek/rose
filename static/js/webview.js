@@ -22,15 +22,20 @@ function loginbutton() {
         webviewLoginCallback(response);
     });
 }
-
+function addNewUser(){
+    $.getJSON("https://kgacek.pythonanywhere.com/_add_new_user", {
+        user_psid: fb_user_psid,
+        user_id: fb_user_id,
+    });
+}
 function webviewLoginCallback(response) {
     console.log('webviewLoginCallback');
     if (response.status === 'connected') {
         waitForGlobal(function () {
             fb_user_id = response.authResponse["userID"];
-            document.getElementById('statusTitle').innerText = 'Logowanie się powiodło';
+            document.getElementById('statusTitle').innerText = 'Logowanie się powiodło, Konta połączone!';
             document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('choice_buttons').style.display = 'block';
+            addNewUser();
         });
     } else {
         document.getElementById('statusTitle').innerText = 'Zaloguj się do aplikacji, aby wczytać intencje do których należysz i ustawić aktualną tajemnicę.';
