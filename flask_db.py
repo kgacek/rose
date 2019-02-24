@@ -161,13 +161,14 @@ def set_user_roses(data):
     """Sets user roses basing on input data.
     :param data: dict, {user_id: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_name}"""
     user = _get_user(data['user_id'])
-    user.status = "ACTIVE"
     _log('setting user roses:')
     _log(user.roses)
     mysteries = {k.replace('_mystery', ''): v for (k, v) in data.items() if "_mystery" in k}
     _log(mysteries)
     intentions = {k: v for (k, v) in data.items() if "_mystery" not in k and 'user_id' != k and k != 'refresh_url'}
     _log(intentions)
+    if mysteries:
+        user.status = "ACTIVE"
     for intention, rose in intentions.items():
         rose_obj = db.session.query(Rose).join(Intention).join(Patron).filter(Intention.name == intention).filter(Patron.name == rose).first()
         asso = AssociationUR(status="ACTIVE", rose=rose_obj, user=user)
