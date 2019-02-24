@@ -11,6 +11,9 @@
 <script type=text/javascript src="/static/js/roses.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
+<div class="desc bar" id="userList" style='display: none'>
+    <h3>Wybierz użytkownika</h3>
+</div>
 <div id="prayersSection" class="desc bar">
     <h3>Twoje Tajemnice</h3>
     <p>Znajdziesz tutaj wszystkie rozważane tajemnice Różańca na bieżący i przyszły miesiąc (wraz z informacją o terminie zmiany tajemnic). Pod Twoimi Różami widnieje przycisk potwierdzający modlitwę.
@@ -23,8 +26,12 @@
     <p>Jeśli jesteś <b>nowym użytkownikiem</b>, nie musisz tutaj nic robić, niedługo aplikacja sama przydzieli Ci Róże i tajemnice w intencjach, które wybrałeś. Jeśli jednak <b>uczestniczyłeś
         wczesniej</b> w naszej modlitwie, to w tym miejscu znajdź i zaznacz <u>aktualnie odmawianą tajemnicę</u>. Jest to działanie jednorazowe, w kolejnych miesiącach aplikacja sama będzie Cię
         informowała o zmianie tajemnic. </p>
+
     <h4 id="statusTitle">Sprawdzam status..</h4>
-    <form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" accept-charset="UTF-8" style='display: none'></form>
+    <form id="myForm" action="https://kgacek.pythonanywhere.com/_get_users_intentions" method="post" accept-charset="UTF-8">
+        <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/roses" style='display: none'>
+        <div id="myFormDiv"></div>
+    </form>
 </div>
 <form id="userSub" action="https://kgacek.pythonanywhere.com/_get_users_prayers" method="post" accept-charset="UTF-8" style='display: none'>
     <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/roses" style='display: none'>

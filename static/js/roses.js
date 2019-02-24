@@ -1,3 +1,34 @@
+function selectUser(data) {
+    var select = document.createElement('select');
+    select.name='user_name';
+    select.style.width= '100%';
+    select.onchange= function (){user_prayers(this.value); already_user(this.value);};
+    var option = document.createElement('option');
+    option.value = 'current_user';
+    option.text = 'Ja';
+    option.selected = 'selected';
+    select.appendChild(option);
+    for (var user_name in data) {
+        option = document.createElement('option');
+        option.value = data[user_name];
+        option.text = user_name;
+        select.appendChild(option);
+    }
+    return select
+
+}
+
+function userList(){
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_users",{
+    status: 'ALL'
+    }, function (data) {
+        document.getElementById('userList').style.display = 'block';
+        document.getElementById('userList').appendChild(selectUser(data));
+    });
+}
+
+
+
 function setMysteries(intentionSel, rose) {
     var select = document.getElementById(intentionSel.id + "_mystery");
     while (select.firstChild) {
@@ -26,22 +57,16 @@ function setMysteries(intentionSel, rose) {
     }
 
 }
-function genTable(data) {
-    var myForm = document.getElementById('myForm');
+function genTable(data, user_id) {
+    var myForm = document.getElementById('myFormDiv');
     while (myForm.firstChild) {
         myForm.removeChild(myForm.firstChild);
     }
     var head = document.createElement("INPUT");
     head.name="user_id";
-    head.value=fb_user_id;
+    head.value=user_id;
     head.style.display = 'none';
     myForm.appendChild(head)
-    head = document.createElement("INPUT");
-    head.name="refresh_url";
-    head.value="https://kgacek.pythonanywhere.com/roses";
-    head.style.display = 'none';
-    myForm.appendChild(head)
-
     for (intention in data) {
         var fieldset = document.createElement("FIELDSET");
         var container = document.createElement("DIV");
@@ -110,9 +135,9 @@ function genUlPrayer(data){
     return ul;
 }
 
-function user_prayers() {
+function user_prayers(user_id) {
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_prayers", {
-        user_id: fb_user_id
+        user_id: user_id
     }, function (data) {
         var prayers = document.getElementById('prayers');
         while (prayers.firstChild) {
@@ -144,7 +169,7 @@ function user_prayers() {
             }
             btn.className = "myButton";
             btn.name = 'user_id';
-            btn.value = fb_user_id;
+            btn.value = user_id;
             btn.setAttribute("form", "userSub");
             prayers.appendChild(btn)
             notification.innerText='Pomyliłeś się? Wróć do zakładki "moje intencje", wybierz i usuń intencję w której zrobiłeś błąd - Będziesz mógł dodać ją jeszcze raz.'
@@ -162,18 +187,17 @@ function user_prayers() {
 
 
 
-function already_user() {
+function already_user(user_id) {
     document.getElementById('choice_buttons').style.display = 'none';
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
-        user_id: fb_user_id
+        user_id: user_id
     }, function (data) {
         if (!data['active']){
             document.getElementById('statusTitle').innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, cierpliwości!';
         }
         else if (Object.keys(data['intentions']).length > 0) {
             document.getElementById('statusTitle').innerText = 'Wybierz Patrona i aktualnie odmawianą tajemnicę dla każdej róży w której uczestniczysz:';
-            document.getElementById('myForm').style.display = 'block';
-            genTable(data['intentions']);
+            genTable(data['intentions'], user_id);
         }
         else if (Object.keys(data['already_assigned']).length > 0) {
             document.getElementById('statusTitle').innerText = 'Masz już przypisane tajemnice dla wszystkich Intencji w których się modlisz.';
@@ -192,11 +216,12 @@ function LoginCallback(response) {
         fb_user_id = response.authResponse["userID"];
         if (['10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
+            userList()
         } else {
             updateNavbar('connected');
         }
-        already_user()
-        user_prayers()
+        already_user(fb_user_id)
+        user_prayers(fb_user_id)
     }
     else{
     window.location.replace("https://kgacek.pythonanywhere.com/");

@@ -11,6 +11,9 @@
 <script type=text/javascript src="/static/js/intentions.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
+<div class="desc bar" id="userList" style='display: none'>
+   <h3>Wybierz użytkownika, którego zapisujesz:</h3>
+</div>
 <div id="status" class="desc bar">
     <h3>Twoje Intencje</h3>
     <p id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</p>
@@ -19,8 +22,10 @@
 <div  class="desc bar">
     <h3>Rejestracja Intencji</h3>
     <p>W tym miejscu możesz zapisać się do nowych intencji.</p>
+
     <form id="newIntention" action="https://kgacek.pythonanywhere.com/_process_intention" method="post" accept-charset="UTF-8">
         <input type="text" name="refresh_url" value="https://kgacek.pythonanywhere.com/intentions" style='display: none'>
+        <h4 >Podaj Intencję:</h4>
         <div id="newIntentionDiv"></div>
         <input type="submit" name="action" value="Dodaj" class="myButton">
         <input type="submit" name="action" value="Usuń" class="myButton">

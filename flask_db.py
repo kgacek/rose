@@ -43,11 +43,11 @@ def connect_user_id(user_id, user_psid, username):
     if user.status != 'BLOCKED':
         if user_psid:
             user.psid = user_psid
-        simillar_users = db.session.query(User).filter(User.fullname.like(username+'%')).all()
-        if simillar_users and not [el for el in simillar_users if user_id == el.global_id]:
-            true_simillar_users = [el for el in simillar_users if username == el.fullname or re.match(r'{}( - \d\d)'.format(username), el.fullname)]
-            if true_simillar_users:
-                username = '{username} - {number}'.format(username=username, number=str(len(true_simillar_users)).zfill(2))
+        similar_users = db.session.query(User).filter(User.fullname.like(username+'%')).all()
+        if similar_users and not [el for el in similar_users if user_id == el.global_id]:
+            true_similar_users = [el for el in similar_users if username == el.fullname or re.match(r'{}( - \d\d)'.format(username), el.fullname)]
+            if true_similar_users:
+                username = '{username} - {number}'.format(username=username, number=str(len(true_similar_users)).zfill(2))
         user.fullname = username
         db.session.commit()
     return user.status
@@ -65,7 +65,11 @@ def add_user_intention(data):
     :param data: dict, {user_id: <str>, intention_name: <str>}
     :return list of user intentions
     """
-    user = _get_user(data['user_id'])
+    user_name = data.get('user_name')
+    if user_name and user_name != 'current_user':
+        user = db.session.query(User).filter_by(fullname=user_name).first()
+    else:
+        user = _get_user(data['user_id'])
     if user.status != 'BLOCKED':
         if user.status == 'OBSOLETE':
             user.status = 'VERIFIED'
@@ -82,7 +86,11 @@ def remove_user_intention(data):
     :param data: dict, {user_id: <str>, intention_name: <str>}
     :return list of user intentions
     """
-    user = _get_user(data['user_id'])
+    user_name = data.get('user_name')
+    if user_name and user_name != 'current_user':
+        user = db.session.query(User).filter_by(fullname=user_name).first()
+    else:
+        user = _get_user(data['user_id'])
     intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
     print('removing: ' + intention.name)
     if intention in user.intentions:
@@ -234,6 +242,16 @@ def get_new_users():
     for user in users:
         user_intentions[user.fullname] = [intention.name for intention in user.intentions]
     return user_intentions
+
+
+def get_users(status):
+    """Gets all users with given status.
+    :return dict. {username: user id }"""
+    if status == 'ALL':
+        users = db.session.query(User).filter(User.status != 'BLOCKED').all()
+    else:
+        users = db.session.query(User).filter(User.status == status).all()
+    return {user.fullname: user.global_id for user in users}
 
 
 def subscribe_user(user_id=None, user_psid=None):

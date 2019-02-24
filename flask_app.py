@@ -61,6 +61,11 @@ def get_new_users():
         return redirect(url_for('index'))
 
 
+@app.route('/_get_users')
+def get_users():
+    return jsonify(flask_db.get_users(request.args.get('status')))
+
+
 @app.route('/_process_intention', methods=['GET', 'POST'])
 def process_intention():
     data = request.form
