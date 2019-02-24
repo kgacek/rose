@@ -39,8 +39,8 @@ def _get_user(user_id, create=True, status="VERIFIED"):
 def connect_user_id(user_id, user_psid, username):
     """connects user IDs. invokes when user will start adding intentions via webview in messenger.
     Additionally, fullname is updated."""
-    if user_id:
-        user = _get_user(user_id)
+    user = _get_user(user_id)
+    if user.status != 'BLOCKED':
         if user_psid:
             user.psid = user_psid
         simillar_users = db.session.query(User).filter(User.fullname.like(username+'%')).all()
@@ -50,6 +50,7 @@ def connect_user_id(user_id, user_psid, username):
                 username = '{username} - {number}'.format(username=username, number=str(len(true_simillar_users)).zfill(2))
         user.fullname = username
         db.session.commit()
+    return user.status
 
 
 def get_all_intentions():
@@ -65,13 +66,14 @@ def add_user_intention(data):
     :return list of user intentions
     """
     user = _get_user(data['user_id'])
-    if user.status == 'OBSOLETE':
-        user.status = 'VERIFIED'
-    intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
-    print('adding: ' + intention.name)
-    if intention not in user.intentions:
-        user.intentions.append(intention)
-    db.session.commit()
+    if user.status != 'BLOCKED':
+        if user.status == 'OBSOLETE':
+            user.status = 'VERIFIED'
+        intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
+        print('adding: ' + intention.name)
+        if intention not in user.intentions:
+            user.intentions.append(intention)
+        db.session.commit()
     return [intention.name for intention in user.intentions]
 
 

@@ -44,6 +44,7 @@ class User(Base):
     VERIFIED - when accepted by admin
     ACTIVE - when have at least one active rose
     OBSOLETE - when unsubscribed
+    BLOCKED - user is blocked
     """
     __tablename__ = 'users'
     global_id = Column(String(50), primary_key=True)

@@ -89,11 +89,13 @@ def remove_users_intention():
 
 @app.route('/_add_new_user')
 def add_new_user():
+    status = 'None'
     user_id = request.args.get('user_id')
     user_psid = request.args.get('user_psid')
     if user_id:
         username = bot.get_user_info(user_id)['name']
-        flask_db.connect_user_id(user_id, user_psid, username)
+        status = flask_db.connect_user_id(user_id, user_psid, username)
+    return jsonify({'status': status})
 
 
 @app.route('/_get_all_intentions')
