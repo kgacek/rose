@@ -11,28 +11,6 @@ function genSelect(data, select_name) {
     return select
 }
 
-
-function genUserSelect(data) {
-    var select = document.createElement('select');
-    select.name='user_name';
-    select.style.width= '100%';
-    select.onchange= function (){document.getElementById('user_id').value=this.value; showStatus(this.value); };
-    var option = document.createElement('option');
-    option.value = 'current_user';
-    option.text = 'Ja';
-    option.selected = 'selected';
-    select.appendChild(option);
-    for (var user_name in data) {
-        option = document.createElement('option');
-        option.value = data[user_name];
-        option.text = user_name;
-        select.appendChild(option);
-    }
-    return select
-
-}
-
-
 function selectIntention(data, user_id) {
     var id = document.createElement("INPUT");
     id.id="user_id"
@@ -41,17 +19,6 @@ function selectIntention(data, user_id) {
     id.style.display = 'none';
     document.getElementById('newIntention').appendChild(id);
     document.getElementById('newIntentionDiv').appendChild(genSelect(data, 'intention_name'));
-
-}
-
-function selectUser() {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users",{
-    status: 'ALL'
-    }, function (data) {
-        document.getElementById('userList').style.display = 'block';
-        var select = genUserSelect(data)
-        document.getElementById('userList').appendChild(select);
-    });
 
 }
 
@@ -112,12 +79,11 @@ function showStatus(user_id) {
 function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
-        fb_user_psid = false; // todo: poprawic
         fb_user_id = response.authResponse["userID"];
         showStatus(fb_user_id);
         if (['10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681', '838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
-            selectUser()
+            userList(function (){document.getElementById('user_id').value=this.value; showStatus(this.value); })
         }else {
             updateNavbar('connected');
         }

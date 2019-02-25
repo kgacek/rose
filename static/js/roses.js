@@ -1,34 +1,3 @@
-function selectUser(data) {
-    var select = document.createElement('select');
-    select.name='user_name';
-    select.style.width= '100%';
-    select.onchange= function (){user_prayers(this.value); already_user(this.value);};
-    var option = document.createElement('option');
-    option.value = 'current_user';
-    option.text = 'Ja';
-    option.selected = 'selected';
-    select.appendChild(option);
-    for (var user_name in data) {
-        option = document.createElement('option');
-        option.value = data[user_name];
-        option.text = user_name;
-        select.appendChild(option);
-    }
-    return select
-
-}
-
-function userList(){
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users",{
-    status: 'ALL'
-    }, function (data) {
-        document.getElementById('userList').style.display = 'block';
-        document.getElementById('userList').appendChild(selectUser(data));
-    });
-}
-
-
-
 function setMysteries(intentionSel, rose) {
     var select = document.getElementById(intentionSel.id + "_mystery");
     while (select.firstChild) {
@@ -57,6 +26,7 @@ function setMysteries(intentionSel, rose) {
     }
 
 }
+
 function genTable(data, user_id) {
     var myForm = document.getElementById('myFormDiv');
     while (myForm.firstChild) {
@@ -184,9 +154,6 @@ function user_prayers(user_id) {
 
 }
 
-
-
-
 function already_user(user_id) {
     document.getElementById('choice_buttons').style.display = 'none';
     $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
@@ -216,7 +183,7 @@ function LoginCallback(response) {
         fb_user_id = response.authResponse["userID"];
         if (['10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
-            userList()
+            userList(function (){user_prayers(this.value); already_user(this.value);})
         } else {
             updateNavbar('connected');
         }

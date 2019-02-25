@@ -1,3 +1,30 @@
+function selectUser(data, callback) {
+    var select = document.createElement('select');
+    select.onchange= callback;
+    var option = document.createElement('option');
+    option.value = fb_user_id;
+    option.text = 'Ja';
+    option.selected = 'selected';
+    select.appendChild(option);
+    for (var user_name in data) {
+        option = document.createElement('option');
+        option.value = data[user_name];
+        option.text = user_name;
+        select.appendChild(option);
+    }
+    return select
+
+}
+
+function userList(callback){
+    $.getJSON("https://kgacek.pythonanywhere.com/_get_users",{
+    status: 'ALL'
+    }, function (data) {
+        document.getElementById('userList').style.display = 'block';
+        document.getElementById('userList').appendChild(selectUser(data, callback));
+    });
+}
+
 function updateNavbar(status){
     var bar=document.getElementById('navBar')
     while (bar.firstChild) {
