@@ -23,7 +23,7 @@ function selectIntention(data, user_id) {
 }
 
 function IntentionForm(user_id){
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_all_intentions",
+    $.getJSON("https://www.rozamaria.pl/_get_all_intentions",
     function (data) {
         selectIntention(data, user_id);
     });
@@ -54,7 +54,7 @@ function genIntentionList(approved, pending) {
 }
 
 function showStatus(user_id) {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
+    $.getJSON("https://www.rozamaria.pl/_get_users_intentions", {
         user_id: user_id
     }, function (data) {
         var status = document.getElementById('statusTitle')
@@ -90,7 +90,7 @@ function LoginCallback(response) {
         IntentionForm(fb_user_id)
     }
     else{
-    window.location.replace("https://kgacek.pythonanywhere.com/");
+    window.location.replace("https://www.rozamaria.pl/");
 
     }
 }

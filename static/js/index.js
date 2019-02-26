@@ -1,5 +1,5 @@
 function addNewUser(fb_id){
-    $.getJSON("https://kgacek.pythonanywhere.com/_add_new_user", {
+    $.getJSON("https://www.rozamaria.pl/_add_new_user", {
         user_id: fb_id,
     }, function (data) {
         if (data['status'] === 'BLOCKED'){

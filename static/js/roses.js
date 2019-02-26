@@ -11,7 +11,7 @@ function setMysteries(intentionSel, rose) {
         select.appendChild(option);
     }
     else{
-        $.getJSON("https://kgacek.pythonanywhere.com/_get_free_mysteries", {
+        $.getJSON("https://www.rozamaria.pl/_get_free_mysteries", {
             rose: rose
         }, function (data) {
             intentionSel.name = intentionSel.id;
@@ -106,7 +106,7 @@ function genUlPrayer(data){
 }
 
 function user_prayers(user_id) {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_prayers", {
+    $.getJSON("https://www.rozamaria.pl/_get_users_prayers", {
         user_id: user_id
     }, function (data) {
         var prayers = document.getElementById('prayers');
@@ -156,7 +156,7 @@ function user_prayers(user_id) {
 
 function already_user(user_id) {
     document.getElementById('choice_buttons').style.display = 'none';
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
+    $.getJSON("https://www.rozamaria.pl/_get_users_intentions", {
         user_id: user_id
     }, function (data) {
         if (!data['active']){
@@ -191,6 +191,6 @@ function LoginCallback(response) {
         user_prayers(fb_user_id)
     }
     else{
-    window.location.replace("https://kgacek.pythonanywhere.com/");
+    window.location.replace("https://www.rozamaria.pl/");
     }
 }

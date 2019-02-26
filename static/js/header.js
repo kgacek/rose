@@ -17,7 +17,7 @@ function selectUser(data, callback) {
 }
 
 function userList(callback){
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users",{
+    $.getJSON("https://www.rozamaria.pl/_get_users",{
     status: 'ALL'
     }, function (data) {
         document.getElementById('userList').style.display = 'block';
@@ -32,26 +32,26 @@ function updateNavbar(status){
     }
     var btn = document.createElement("a");
     btn.className = "navButton"
-    btn.href="https://kgacek.pythonanywhere.com/"
+    btn.href="https://www.rozamaria.pl/"
     btn.innerText="Strona Główna"
     bar.appendChild(btn)
 
     if (status === "connected" || status === "admin"){
         btn = document.createElement("a");
         btn.className = "navButton"
-        btn.href="https://kgacek.pythonanywhere.com/intentions"
+        btn.href="https://www.rozamaria.pl/intentions"
         btn.innerText="Moje Intencje"
         bar.appendChild(btn)
         btn = document.createElement("a");
         btn.className = "navButton"
-        btn.href="https://kgacek.pythonanywhere.com/roses"
+        btn.href="https://www.rozamaria.pl/roses"
         btn.innerText="Moje Róże"
         bar.appendChild(btn)
     }
     if (status === "admin"){
         btn = document.createElement("a");
         btn.className = "navButton"
-        btn.href="https://kgacek.pythonanywhere.com/admin"
+        btn.href="https://www.rozamaria.pl/admin"
         btn.innerText="Panel Administratora"
         bar.appendChild(btn)
     }
