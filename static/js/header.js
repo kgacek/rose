@@ -47,13 +47,23 @@ function updateNavbar(status){
         btn.href="https://www.rozamaria.pl/roses"
         btn.innerText="Moje Róże"
         bar.appendChild(btn)
+
+        if (status === "admin"){
+            btn = document.createElement("a");
+            btn.className = "navButton"
+            btn.href="https://www.rozamaria.pl/admin"
+            btn.innerText="Panel Administratora"
+            bar.appendChild(btn)
+        }
     }
-    if (status === "admin"){
+    else{
         btn = document.createElement("a");
-        btn.className = "navButton"
-        btn.href="https://www.rozamaria.pl/admin"
-        btn.innerText="Panel Administratora"
+        btn.className = "logButton"
+        btn.href="#"
+        btn.onclick= function(){FB.login(function (response) {LoginCallback(response)}); return false;}
+        btn.innerText="Zaloguj"
         bar.appendChild(btn)
+
     }
 }
 

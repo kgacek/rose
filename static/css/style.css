@@ -87,42 +87,33 @@ background: linear-gradient(to right, #F4E7CA 0%, #FFFFFF 50%, #F4ECCE 100%);
 	top:1px;
 }
 
-
-
-
-.logbutton {
-	-moz-box-shadow:inset 0px 1px 0px 0px #7a8eb9;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #7a8eb9;
-	box-shadow:inset 0px 1px 0px 0px #7a8eb9;
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #637aad), color-stop(1, #5972a7));
-	background:-moz-linear-gradient(top, #637aad 5%, #5972a7 100%);
-	background:-webkit-linear-gradient(top, #637aad 5%, #5972a7 100%);
-	background:-o-linear-gradient(top, #637aad 5%, #5972a7 100%);
-	background:-ms-linear-gradient(top, #637aad 5%, #5972a7 100%);
-	background:linear-gradient(to bottom, #637aad 5%, #5972a7 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#637aad', endColorstr='#5972a7',GradientType=0);
-	background-color:#637aad;
-	border:1px solid #314179;
+.logButton {
+	-moz-box-shadow:inset 0px 1px 0px 0px #54a3f7;
+	-webkit-box-shadow:inset 0px 1px 0px 0px #54a3f7;
+	box-shadow:inset 0px 1px 0px 0px #54a3f7;
+	background-color: #429cc1;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:2px;
+	border:1px solid #124d77;
 	display:inline-block;
 	cursor:pointer;
 	color:#ffffff;
 	font-family:Arial;
-	font-size:22px;
+	font-size:15px;
 	font-weight:bold;
-	padding:6px 12px;
+	font-style:italic;
+	padding:8px 24px;
+	margin-right:8px;
+	margin-bottom: 20px;
 	text-decoration:none;
+	text-shadow:0px 1px 0px #154682;
+	float: right;
 }
-.logbutton:hover {
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #5972a7), color-stop(1, #637aad));
-	background:-moz-linear-gradient(top, #5972a7 5%, #637aad 100%);
-	background:-webkit-linear-gradient(top, #5972a7 5%, #637aad 100%);
-	background:-o-linear-gradient(top, #5972a7 5%, #637aad 100%);
-	background:-ms-linear-gradient(top, #5972a7 5%, #637aad 100%);
-	background:linear-gradient(to bottom, #5972a7 5%, #637aad 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#5972a7', endColorstr='#637aad',GradientType=0);
-	background-color:#5972a7;
+.logButton:hover {
+	background-color:#0061a7;
 }
-.logbutton:active {
+.logButton:active {
 	position:relative;
 	top:1px;
 }
