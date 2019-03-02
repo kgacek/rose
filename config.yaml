@@ -13,6 +13,10 @@ sql:
   rose:
     full_address:
       "mysql://kgacek:{pass}@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
+  local:
+    full_address:
+      "mysql://kgacek:{pass}@127.0.0.1/kgacek$roza?charset=utf8"
+
 log:
   manager:
     '/home/kgacek/app_logs/manager.log'
