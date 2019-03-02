@@ -145,13 +145,19 @@ function user_prayers(user_id) {
             notification.innerText='Pomyliłeś się? Wróć do zakładki "moje intencje", wybierz i usuń intencję w której zrobiłeś błąd - Będziesz mógł dodać ją jeszcze raz.'
         }
         else{
-        notification.className='warning'
-        notification.innerText='Dodaj Tajemnice które odmawiasz lub zaczekaj, jeśli nie brałeś wcześniej udziału w Różach - aplikacja sama je przydzieli.'
+        notification.innerText='Prosimy o cierpliwość! Niedługo zostaniesz przydzielony do Róży w Intencji, którą wybrałeś.'
         }
         prayers.appendChild(notification)
 
     });
 
+}
+
+function clean_forms(){
+    var myForm = document.getElementById('myFormDiv');
+    while (myForm.firstChild) {
+        myForm.removeChild(myForm.firstChild);
+    }
 }
 
 function already_user(user_id) {
@@ -183,11 +189,12 @@ function LoginCallback(response) {
         fb_user_id = response.authResponse["userID"];
         if (['10205894962648737', '10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
-            userList(function (){user_prayers(this.value); already_user(this.value);})
+            document.getElementById('status').style.display = 'block';
+            userList(function (){user_prayers(this.value); clean_forms(); already_user(this.value);})
+            already_user(fb_user_id)
         } else {
             updateNavbar('connected');
         }
-        already_user(fb_user_id)
         user_prayers(fb_user_id)
     }
     else{

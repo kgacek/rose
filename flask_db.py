@@ -26,7 +26,7 @@ def _log(msg):
         log.write(str(msg) + '\n')
 
 
-def _get_user(user_id, create=True, status="VERIFIED"):
+def _get_user(user_id, create=True, status="NEW"):
     """Gets user db object for given user_id. creates it if don't exist yet.
     :return User object"""
     user = db.session.query(User).filter_by(global_id=user_id).first()
@@ -34,6 +34,21 @@ def _get_user(user_id, create=True, status="VERIFIED"):
         user = User(global_id=user_id, status=status)
         db.session.add(user)
     return user
+
+
+def connect_accounts(user, tmp_user):
+    """connects temporary user with true user"""
+    user.status = tmp_user.status
+    user.intentions = tmp_user.intentions
+    for tmp_asso in tmp_user.roses:
+        asso = AssociationUR(status="ACTIVE", rose=tmp_asso.rose, user=user)
+        new = Prayer(mystery_id=tmp_asso.prayers[-1].mystery_id, ends=tmp_asso.rose.ends)
+        asso.prayers.append(new)
+        db.session.add(asso)
+    db.session.commit()
+    unsubscribe_user(user_id=tmp_user.global_id)
+    tmp_user.status = 'BLOCKED'
+    db.session.commit()
 
 
 def connect_user_id(user_id, user_psid, username):
@@ -47,7 +62,10 @@ def connect_user_id(user_id, user_psid, username):
         if similar_users and not [el for el in similar_users if user_id == el.global_id]:
             true_similar_users = [el for el in similar_users if username == el.fullname or re.match(r'{}( - \d\d)'.format(username), el.fullname)]
             if true_similar_users:
-                username = '{username} - {number}'.format(username=username, number=str(len(true_similar_users)).zfill(2))
+                if len(true_similar_users) == 1 and true_similar_users[0].global_id == true_similar_users[0].fullname:
+                    connect_accounts(user, true_similar_users[0])
+                else:
+                    username = '{username} - {number}'.format(username=username, number=str(len(true_similar_users)).zfill(2))
         user.fullname = username
         db.session.commit()
     return user.status

@@ -22,7 +22,7 @@ with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
     PASSWORD = f.readline().strip()
 
 bot = Bot(CONFIG['token']['test'])
-engine = create_engine(CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD), pool_recycle=280, pool_size=3, max_overflow=0, echo=True)
+engine = create_engine(CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD), pool_recycle=280, pool_size=3, max_overflow=0)
 Session = sessionmaker(bind=engine)
 
 
