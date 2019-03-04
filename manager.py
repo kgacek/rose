@@ -115,9 +115,9 @@ class Manager(object):
         """Creates new Rose  in <intention>, and adds <user> to it.
         :param user:  User object
         :param intention: Intention object"""
-        _log('creating new rose..')
+        _log('- Creating new rose')
         patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
-        _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
+        _log('-- attaching user{} to rose:{} intention:{}'.format(user.fullname, patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
                     ends=date.today() + relativedelta(months=1),
                     patron_id=patron.id)
@@ -167,6 +167,7 @@ class Manager(object):
                     for rose in roses_candidates:
                         free_mystery = self.get_free_mystery(rose)
                         if free_mystery != 0:
+                            _log('--attaching user:{} to rose: {} mystery nr: {} in intention: {}'.format(user.fullname, rose.patron.name, free_mystery, intention.name))
                             asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
                             new = Prayer(mystery_id=free_mystery, ends=rose.ends)
                             asso.prayers.append(new)
