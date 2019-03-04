@@ -207,6 +207,11 @@ width: 400px;
 margin-bottom: 10px;
 }
 
+input.name{
+width: 400px;
+margin-bottom: 10px;
+}
+
 table.statTable {
   font-family: "Times New Roman", Times, serif;
   border: 1px solid #515151;

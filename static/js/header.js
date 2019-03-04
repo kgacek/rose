@@ -1,6 +1,7 @@
 function selectUser(data, callback) {
     var select = document.createElement('select');
     select.onchange= callback;
+    select.name = "user_global_id";
     var option = document.createElement('option');
     option.value = fb_user_id;
     option.text = 'Ja';
@@ -16,12 +17,12 @@ function selectUser(data, callback) {
 
 }
 
-function userList(callback){
+function userList(elemID, callback){
     $.getJSON("https://www.rozamaria.pl/_get_users",{
     status: 'ALL'
     }, function (data) {
-        document.getElementById('userList').style.display = 'block';
-        document.getElementById('userList').appendChild(selectUser(data, callback));
+        document.getElementById(elemID).style.display = 'block';
+        document.getElementById(elemID).appendChild(selectUser(data, callback));
     });
 }
 

@@ -36,6 +36,12 @@ def _get_user(user_id, create=True, status="NEW"):
     return user
 
 
+def get_user_rose_association(user_id):
+    """Gets user roses association object including roses from attached account.
+    :return list of AssociationUR objects"""
+    return db.session.query(AssociationUR).filter_by(user_id=user_id).all() + db.session.query(AssociationUR).filter(AssociationUR.user_id.like('%.' + user_id)).all()
+
+
 def connect_accounts(user, tmp_user):
     """connects temporary user with true user"""
     user.status = tmp_user.status
@@ -69,6 +75,23 @@ def connect_user_id(user_id, user_psid, username):
         user.fullname = username
         db.session.commit()
     return user.status
+
+
+def create_functional_user(user_id):
+    """creates new functional account for given user"""
+    user = _get_user(user_id)
+    if user.status != 'BLOCKED' and user.fullname != user.global_id and "." not in user_id:
+        functional_users = db.session.query(User).filter(User.global_id.like('%.' + user_id)).all()
+        prefix = str(len(functional_users)+1)
+        db.session.add(User(global_id=prefix + "." + user.global_id, fullname="._" + user.fullname + "_." + prefix, status="ACTIVE"))
+        db.session.commit()
+
+
+def create_non_fb_user(non_fb_user):
+    """creates new user not connected with Facebook account"""
+    if not db.session.query(User).filter_by(fullname=non_fb_user).first():
+        db.session.add(User(global_id="." + non_fb_user, fullname="." + non_fb_user + ".", status="ACTIVE"))
+        db.session.commit()
 
 
 def get_all_intentions():
@@ -117,13 +140,21 @@ def remove_user_intention(data):
     return [intention.name for intention in user.intentions]
 
 
+def get_free_rose_name(name, prayers):
+    if name in prayers:
+        for i in range(1, 100):
+            new_name = '{} - {}'.format(name, str(i))
+            if new_name not in prayers:
+                return new_name
+    return name
+
+
 def get_user_prayers(user_id):
     """Gets user prayers and status
     :param user_id: User.global_id
     :return dict, {<patron name> : {'ends': <cycle end>, 'current':<current mystery>, next:<next mystery>, next_status: <'NOT_ACTIVE','TO_APPROVAL','APPROVED'>, intention: name}..}"""
-    user = _get_user(user_id)
     prayers = {}
-    for asso in user.roses:
+    for asso in get_user_rose_association(user_id):
         if asso.status != 'EXPIRED':
             current_mystery = asso.prayers[-1].mystery
             if asso.rose.intention_id == "642811842749838":  # Psałterz
@@ -134,7 +165,8 @@ def get_user_prayers(user_id):
                 status = 'TO_APPROVAL' if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today() else 'NOT_ACTIVE'
             else:
                 status = 'APPROVED'
-            prayers[asso.rose.patron.name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name}
+            rose_name = get_free_rose_name(asso.rose.patron.name, prayers)
+            prayers[rose_name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name}
     _log(prayers)
     return prayers
 
@@ -277,15 +309,16 @@ def subscribe_user(user_id=None, user_psid=None):
     STATUS CHANGE: UR asso for roses which ends soon, will be changed from ACTIVE to SUBSCRIBED.
     Affects only roses which have ACTIVE status. EXPIRED asso wont be changed"""
     if user_id:
-        user_asso = db.session.query(AssociationUR).filter_by(user_id=user_id).filter_by(status='ACTIVE').all()
+        user = _get_user(user_id)
     else:
-        user_asso = db.session.query(AssociationUR).join(User).filter(User.psid == user_psid).filter_by(status='ACTIVE').all()
-    expiring_association = [asso for asso in user_asso if
-                            asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()]
-    for association in expiring_association:
-        if association.status == 'ACTIVE':
-            association.status = 'SUBSCRIBED'
-    db.session.commit()
+        user = db.session.query(User).filter(User.psid == user_psid).first()
+    if user:
+        user_asso = get_user_rose_association(user.global_id)
+        expiring_association = [asso for asso in user_asso if asso.rose.ends < timedelta(days=CONFIG['reminder_offset']) + date.today()]
+        for association in expiring_association:
+            if association.status == 'ACTIVE':
+                association.status = 'SUBSCRIBED'
+        db.session.commit()
 
 
 def unsubscribe_user(user_id=None, user_psid=None, intention=None):
@@ -301,10 +334,10 @@ def unsubscribe_user(user_id=None, user_psid=None, intention=None):
     if user:
         if intention:
             user.intentions.remove(intention)
-            asso_u_r = [asso for asso in db.session.query(AssociationUR).filter_by(user_id=user.global_id).all() if asso.rose in intention.roses]
+            asso_u_r = [asso for asso in get_user_rose_association(user.global_id) if asso.rose in intention.roses]
         else:
             user.intentions.clear()
-            asso_u_r = db.session.query(AssociationUR).filter_by(user_id=user.global_id).all()
+            asso_u_r = get_user_rose_association(user.global_id)
 
         for asso in asso_u_r:
             asso.prayers.clear()

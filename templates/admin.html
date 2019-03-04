@@ -11,6 +11,31 @@
 <script type=text/javascript src="/static/js/admin.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
+<div class="desc bar">
+    <h3>Utwórz dodatkowe konto</h3>
+    <div>
+        <form id="createUserSelectForm" action="https://www.rozamaria.pl/_create_functional_user" method="post">
+            <fieldset id="createUserSelect">
+                <legend>Dodatkowe konto dla istniejącego użytkownika</legend>
+                Wybierz z listy użytkownika, dla ktorego chcesz stworzyć dodatkowe konto - Kiedy osoba modli się w kilku różach w tej samej intencji(np Psalmy)<br>
+            </fieldset>
+            <input type="text" name="refresh_url" value="https://www.rozamaria.pl/admin" style='display: none'>
+        </form>
+        <input type="submit" value="stwórz" form="createUserSelectForm" class="myButton">
+    </div>
+    <div>
+        <form action="https://www.rozamaria.pl/_create_functional_user" method="post">
+            <fieldset>
+                <legend>Konto dla użytkownika z poza FB</legend>
+                <input type="text" name="refresh_url" value="https://www.rozamaria.pl/admin" style='display: none'>
+                Podaj unikalną nazwę dla nowego użytkownika:<br>
+                <input type="text" name="non_fb_user" class="name">
+            </fieldset>
+            <input type="submit" value="stwórz" class="myButton">
+        </form>
+    </div>
+    <p>Po utworzeniu konta przypisz tej osobie intencję i różę! konta tutaj utworzone będą miały w nazwie specialne znaki tj. np. "._Krzysztof Gacek._"</p>
+</div>
 <div id="status" class="desc bar">
     <h3 id="statusTitle">Odśwież stronę!</h3>
     <form id="usersList" action="https://www.rozamaria.pl/_new_users" method="post" style='display: none'>

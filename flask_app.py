@@ -139,6 +139,17 @@ def get_users_intentions():
         return redirect(request.form['refresh_url'])
 
 
+@app.route('/_create_functional_user', methods=['GET', 'POST'])
+def create_functional_user():
+    user_id = request.form.get("user_global_id")
+    non_fb_user = request.form.get("non_fb_user")
+    if non_fb_user:
+        flask_db.create_non_fb_user(non_fb_user)
+    if user_id:
+        flask_db.create_functional_user(user_id)
+    return redirect(request.form['refresh_url'])
+
+
 @app.route("/webview")
 def webview():
     return render_template('webview.html')

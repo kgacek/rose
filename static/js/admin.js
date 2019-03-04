@@ -60,6 +60,7 @@ function LoginCallback(response) {
                         document.getElementById('statusTitle').innerText = 'Brak oczekujących użytkowników.';
                         document.getElementById('usersList').style.display = 'none';
                     }
+                    userList("createUserSelect")
                     document.getElementById('admin_id').value=fb_user_id;
                 });
         } else {
