@@ -233,3 +233,7 @@ table.statTable thead th {
 table.statTable tfoot td {
   font-size: 14px;
 }
+
+tr.active {
+background-color: #5df53799;
+}
