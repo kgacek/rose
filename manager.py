@@ -224,12 +224,6 @@ class Manager(object):
 
 def main():
     manager = Manager()
-    users = manager.get_not_confirmed_users()
-    for user_psid, roses in users.items():
-        manager.send_reminder(user_psid, roses)
-
-    manager.send_notification_about_expired_users(*manager.get_unsubscribed_users())
-
     manager.switch_users()
     manager.attach_new_users_to_roses()
 
