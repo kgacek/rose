@@ -22,7 +22,7 @@ with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
     PASSWORD = f.readline().strip()
 
 bot = Bot(CONFIG['token']['test'])
-engine = create_engine(CONFIG['sql']['rose']['full_address'].format(pass=PASSWORD), pool_recycle=280, pool_size=3, max_overflow=0, echo=True)
+engine = create_engine(CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD), pool_recycle=280, pool_size=3, max_overflow=0)
 Session = sessionmaker(bind=engine)
 
 
@@ -90,7 +90,11 @@ class Manager(object):
             for association in rose.users:
                 if association.status == "SUBSCRIBED":  # 1st case - user subscribed for next month
                     association.status = "ACTIVE"
-                    new = Prayer(mystery_id=association.prayers[-1].mystery_id % 20 + 1, ends=rose.ends)
+                    if rose.intention_id == "642811842749838":  # Psałterz
+                        next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
+                    else:
+                        next_id = association.prayers[-1].mystery_id % 20 + 1
+                    new = Prayer(mystery_id=next_id, ends=rose.ends)
                     association.prayers.append(new)
                 elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
                     association.status = "EXPIRED"
@@ -111,16 +115,19 @@ class Manager(object):
         """Creates new Rose  in <intention>, and adds <user> to it.
         :param user:  User object
         :param intention: Intention object"""
-        _log('creating new rose..')
+        _log('- Creating new rose')
         patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
-        _log('patron:{}\nintention:{}'.format(patron.name, intention.name))
+        _log('-- attaching user{} to rose:{} intention:{}'.format(user.fullname, patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
                     ends=date.today() + relativedelta(months=1),
                     patron_id=patron.id)
         asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
         self.session.add(asso)
         self.session.commit()
-        new = Prayer(mystery_id=1, ends=rose.ends)
+        if rose.intention_id == "642811842749838":  # Psałterz
+            new = Prayer(mystery_id=21, ends=rose.ends)
+        else:
+            new = Prayer(mystery_id=1, ends=rose.ends)
         asso.prayers.append(new)
         self.session.commit()
 
@@ -134,7 +141,11 @@ class Manager(object):
             for prayer in asso.prayers:
                 if prayer.ends == rose.ends:
                     current_mysteries.append(prayer.mystery_id)
-        for i in range(1, 21):
+        if rose.intention_id == "642811842749838":  # Psałterz
+            r = (21, 171)
+        else:
+            r = (1, 21)
+        for i in range(*r):
             if i not in current_mysteries:
                 _log("mystery nr: {}".format(str(i)))
                 return i
@@ -156,6 +167,7 @@ class Manager(object):
                     for rose in roses_candidates:
                         free_mystery = self.get_free_mystery(rose)
                         if free_mystery != 0:
+                            _log('--attaching user:{} to rose: {} mystery nr: {} in intention: {}'.format(user.fullname, rose.patron.name, free_mystery, intention.name))
                             asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
                             new = Prayer(mystery_id=free_mystery, ends=rose.ends)
                             asso.prayers.append(new)
@@ -184,15 +196,34 @@ class Manager(object):
             msg += str(bot.get_user_info(user_psid))
         _log("sending notification about expired users:\n {}".format(msg))  # todo implement real sending
 
+    def unsubscribe_user(self, user_id=None, intention_name=None):
+        """Unsubscribe User from all activities .
+        STATUS CHANGE: User status will be set to OBSOLETE.
+        User Intentions and user roses list will be cleared.
+        User Can subscribe again to any intentions he want, bot no confirmation from admins will be needed in this case.
+        """
+        user = self.session.query(User).filter_by(global_id=user_id).first()
+        if user:
+            if intention_name:
+                intention = self.session.query(Intention).filter(Intention.name == intention_name).first()
+                user.intentions.remove(intention)
+                asso_u_r = [asso for asso in self.session.query(AssociationUR).filter_by(user_id=user.global_id).all() if asso.rose in intention.roses]
+            else:
+                user.intentions.clear()
+                asso_u_r = self.session.query(AssociationUR).filter_by(user_id=user.global_id).all()
+
+            for asso in asso_u_r:
+                asso.prayers.clear()
+                self.session.delete(asso)
+            if not user.intentions:
+                user.status = "OBSOLETE"
+            self.session.commit()
+        else:
+            _log("user have to connect accounts!")
+
 
 def main():
     manager = Manager()
-    users = manager.get_not_confirmed_users()
-    for user_psid, roses in users.items():
-        manager.send_reminder(user_psid, roses)
-
-    manager.send_notification_about_expired_users(*manager.get_unsubscribed_users())
-
     manager.switch_users()
     manager.attach_new_users_to_roses()
 

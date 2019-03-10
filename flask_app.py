@@ -19,7 +19,8 @@ with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
     PASSWORD = f.readline().strip()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].format(pass=PASSWORD)
+app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 flask_db.db.init_app(app)
 bot = Bot(CONFIG['token']['test'])
 
@@ -46,7 +47,8 @@ def roses():
 
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    status_table = flask_db.get_all_status()
+    return render_template('admin.html', status_table=status_table)
 
 
 @app.route('/_new_users', methods=['GET', 'POST'])
@@ -57,6 +59,11 @@ def get_new_users():
         data = request.form
         flask_db.set_user_verified(data)
         return redirect(url_for('index'))
+
+
+@app.route('/_get_users')
+def get_users():
+    return jsonify(flask_db.get_users(request.args.get('status')))
 
 
 @app.route('/_process_intention', methods=['GET', 'POST'])
@@ -72,13 +79,32 @@ def process_intention():
     return redirect(request.form['refresh_url'])
 
 
-@app.route('/_get_all_intentions')
-def get_all_intentions():
+@app.route('/_remove_users_intention', methods=['GET', 'POST'])
+def remove_users_intention():
+    data = request.form
+    print(str(data))
+    admin = data['admin_id']
+    _log('USER REMOVE: removing users from intentions by: {}'.format(admin))
+    for key, val in data.items():
+        if 'admin_id' != key:
+            _log("--- removing {} from {}".format(key, val))
+            flask_db.remove_user_intention({'user_id': key, 'intention_name': val})
+    return redirect(url_for('admin'))
+
+
+@app.route('/_add_new_user')
+def add_new_user():
+    status = 'None'
     user_id = request.args.get('user_id')
     user_psid = request.args.get('user_psid')
     if user_id:
         username = bot.get_user_info(user_id)['name']
-        flask_db.connect_user_id(user_id, user_psid, username)
+        status = flask_db.connect_user_id(user_id, user_psid, username)
+    return jsonify({'status': status})
+
+
+@app.route('/_get_all_intentions')
+def get_all_intentions():
     return jsonify(flask_db.get_all_intentions())
 
 
@@ -111,6 +137,17 @@ def get_users_intentions():
         data = request.form
         flask_db.set_user_roses(data)
         return redirect(request.form['refresh_url'])
+
+
+@app.route('/_create_functional_user', methods=['GET', 'POST'])
+def create_functional_user():
+    user_id = request.form.get("user_global_id")
+    non_fb_user = request.form.get("non_fb_user")
+    if non_fb_user:
+        flask_db.create_non_fb_user(non_fb_user)
+    if user_id:
+        flask_db.create_functional_user(user_id)
+    return redirect(request.form['refresh_url'])
 
 
 @app.route("/webview")
