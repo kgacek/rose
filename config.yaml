@@ -14,12 +14,8 @@ sql:
     full_address:
       "mysql://kgacek:{pass}@kgacek.mysql.pythonanywhere-services.com/kgacek$roza?charset=utf8"
 log:
-  manager:
-    '/home/kgacek/app_logs/manager.log'
-  flask_app:
-    '/home/kgacek/app_logs/flask_app.log'
-  flask_db:
-    '/home/kgacek/app_logs/flask_db.log'
+  '/home/kgacek/app_logs/app.log'
+
 inputs:
   main:
     'input_data.yaml'

@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import yaml
 import os
 import re
-
+import logging
 from my_db import metadata, User, Intention, Prayer, AssociationUR, Mystery, Patron, Rose
 
 """
@@ -16,14 +16,10 @@ Module for handling DB related tasks in flask application
 with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
     CONFIG = yaml.load(f)
 
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 db = SQLAlchemy(metadata=metadata)
 
 STAT = {"ACTIVE": 'Aktywny', "SUBSCRIBED": 'Potwierdzony', 'EXPIRED': "Wypisany"}
-
-
-def _log(msg):
-    with open(CONFIG['log']['flask_db'], 'a+') as log:
-        log.write(str(msg) + '\n')
 
 
 def _get_user(user_id, create=True, status="NEW"):
@@ -108,10 +104,11 @@ def add_user_intention(data):
     """
     user = _get_user(data['user_id'])
     if user.status != 'BLOCKED':
+        logging.info("Adding new intention for user: " + user.global_id)
         if user.status == 'OBSOLETE':
             user.status = 'VERIFIED'
         intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
-        print('adding: ' + intention.name)
+        logging.info('Adding: ' + intention.name)
         if intention not in user.intentions:
             user.intentions.append(intention)
         db.session.commit()
@@ -124,8 +121,9 @@ def remove_user_intention(data):
     :return list of user intentions
     """
     user = _get_user(data['user_id'])
+    logging.info("Removing intention for user: " + user.global_id)
     intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
-    print('removing: ' + intention.name)
+    logging.warning('Removing: ' + intention.name)
     if intention in user.intentions:
         unsubscribe_user(user_id=user.global_id, intention=intention)
     db.session.commit()
@@ -146,6 +144,7 @@ def get_user_prayers(user_id):
     :param user_id: User.global_id
     :return dict, {<patron name> : {'ends': <cycle end>, 'current':<current mystery>, next:<next mystery>, next_status: <'NOT_ACTIVE','TO_APPROVAL','APPROVED'>, intention: name}..}"""
     prayers = {}
+    logging.debug("Getting user prayers information")
     for asso in get_user_rose_association(user_id):
         if asso.status != 'EXPIRED':
             current_mystery = asso.prayers[-1].mystery
@@ -159,7 +158,7 @@ def get_user_prayers(user_id):
                 status = 'APPROVED'
             rose_name = get_free_rose_name(asso.rose.patron.name, prayers)
             prayers[rose_name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name}
-    _log(prayers)
+    logging.debug(str(prayers))
     return prayers
 
 
@@ -187,8 +186,8 @@ def get_user_intentions(user_psid, user_id):
                 already_assigned[intention.name] = rose.patron.name
                 break
             intentions[intention.name].append(rose.patron.name)
-    print(str(intentions))
-    print(str(already_assigned))
+    logging.debug(str(intentions))
+    logging.debug(str(already_assigned))
     return {'intentions': intentions, 'active': user.status != 'NEW', 'already_assigned': already_assigned}
 
 
@@ -219,12 +218,11 @@ def set_user_roses(data):
     """Sets user roses basing on input data.
     :param data: dict, {user_id: <str>. intention_name: <str. assigned rose>, (intention_name)_mystery: mystery_name}"""
     user = _get_user(data['user_id'])
-    _log('setting user roses:')
-    _log(user.roses)
+    logging.info('Setting new roses for user - {}'.format(user.global_id))
     mysteries = {k.replace('_mystery', ''): v for (k, v) in data.items() if "_mystery" in k}
-    _log(mysteries)
     intentions = {k: v for (k, v) in data.items() if "_mystery" not in k and 'user_id' != k and k != 'refresh_url'}
-    _log(intentions)
+    logging.debug("new roses: {}".format(str(intentions)))
+    logging.debug("new mysteries: {}".format(str(mysteries)))
     if mysteries:
         user.status = "ACTIVE"
     for intention, rose in intentions.items():
@@ -241,7 +239,7 @@ def set_user_roses(data):
 def get_current_mysteries(rose):
     """Gets all mysteries currently used in given rose
     :return list of mysteries obj"""
-    _log("getting all free mysteries in rose : {}".format(rose.patron.name))
+    logging.info("Getting all used mysteries in rose : {}".format(rose.patron.name))
     current_mysteries = []
     for asso in rose.users:
         for prayer in asso.prayers:
@@ -255,6 +253,7 @@ def get_free_mysteries(rose):
     :return list of free mysteries obj"""
     if not isinstance(rose, Rose):
         rose = db.session.query(Patron).filter_by(name=rose).first().rose
+    logging.info("Getting all free mysteries in rose : {}".format(rose.patron.name))
     current_m = get_current_mysteries(rose)
     all_m = db.session.query(Mystery).all()
     if rose.intention_id == "642811842749838":  # Psałterz
@@ -268,10 +267,10 @@ def set_user_verified(data):
     STATUS CHANGE: after that user status will be'VERIFIED'. used when Admin approves user
     :param data: {user.fullname:..,user2.fullname:.., ...}
     """
-    print("data: "+str(data))
+    logging.info("Verifying users basing on data: "+str(data))
     users = db.session.query(User).filter(User.fullname.in_(data.keys())).all()
     for user in users:
-        print(user.fullname)
+        logging.debug(user.fullname)
         user.status = 'VERIFIED'
     db.session.commit()
 
@@ -338,4 +337,4 @@ def unsubscribe_user(user_id=None, user_psid=None, intention=None):
             user.status = "OBSOLETE"
         db.session.commit()
     else:
-        _log("user have to connect accounts!")
+        logging.warning("user have to connect accounts!")

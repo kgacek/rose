@@ -7,6 +7,7 @@ from pymessenger.bot import Bot
 import flask_db
 import yaml
 import os
+import logging
 
 """
 Flask application
@@ -18,16 +19,12 @@ with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
 with open(os.path.join(os.path.dirname(__file__), '.pass_rose_db')) as f:
     PASSWORD = f.readline().strip()
 
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 flask_db.db.init_app(app)
 bot = Bot(CONFIG['token']['test'])
-
-
-def _log(msg):
-    with open(CONFIG['log']['flask_app'], 'a+') as f:
-        f.write(str(msg) + '\n')
 
 
 @app.route('/')
@@ -69,12 +66,12 @@ def get_users():
 @app.route('/_process_intention', methods=['GET', 'POST'])
 def process_intention():
     data = request.form
-    print(str(data))
+    logging.info("processing received intention: " + str(data))
     if data['action'] == 'Dodaj':
-        print('adding intention')
+        logging.info('adding intention')
         flask_db.add_user_intention(data)
     elif data['action'] == 'Usuń':
-        print('removing intention')
+        logging.info('removing intention')
         flask_db.remove_user_intention(data)
     return redirect(request.form['refresh_url'])
 
@@ -82,12 +79,12 @@ def process_intention():
 @app.route('/_remove_users_intention', methods=['GET', 'POST'])
 def remove_users_intention():
     data = request.form
-    print(str(data))
+    logging.debug(str(data))
     admin = data['admin_id']
-    _log('USER REMOVE: removing users from intentions by: {}'.format(admin))
+    logging.warning('Removing users from intentions by: {}'.format(admin))
     for key, val in data.items():
         if 'admin_id' != key:
-            _log("--- removing {} from {}".format(key, val))
+            logging.warning("- Removing {} from {}".format(key, val))
             flask_db.remove_user_intention({'user_id': key, 'intention_name': val})
     return redirect(url_for('admin'))
 
@@ -111,7 +108,7 @@ def get_all_intentions():
 @app.route('/_get_free_mysteries')
 def get_free_mysteries():
     rose = request.args.get('rose')
-    _log("rose" + str(rose))
+    logging.debug("Getting free mysteries for rose: " + str(rose))
     return jsonify(flask_db.get_free_mysteries(rose))
 
 
@@ -122,7 +119,7 @@ def get_users_prayers():
         return jsonify(flask_db.get_user_prayers(user_id))
     else:
         user_id = request.form.get('user_id')
-        _log("subscribe" + str(user_id))
+        logging.debug("Subscribing user with id: " + str(user_id))
         flask_db.subscribe_user(user_id)
         return redirect(request.form['refresh_url'])
 
@@ -155,7 +152,7 @@ def webview():
     return render_template('webview.html')
 
 
-@app.route("/login") # todo remove this
+@app.route("/login")  # todo remove this
 def login():
     return render_template('webview.html')
 
@@ -175,7 +172,6 @@ def receive_message():
         for event in output['entry']:
             messaging = event['messaging']
             for message in messaging:
-                _log(message)
                 if message.get('message'):
                     # Facebook Messenger ID for user so we know where to send response back to
                     recipient_id = message['sender']['id']
@@ -212,7 +208,7 @@ def process_message(recipient_id, msg):
 def send_message(recipient_id, response):
     if recipient_id:
         # sends user the text message provided via input response parameter
-        _log("\nsending msg:\n'{0}' \nto '{1}'".format(response, recipient_id))
+        logging.debug("Sending msg: '{0}' to '{1}'".format(response, recipient_id))
         bot.send_text_message(recipient_id,  response)
         return "success"
     else:
