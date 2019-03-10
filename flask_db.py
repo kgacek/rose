@@ -106,11 +106,7 @@ def add_user_intention(data):
     :param data: dict, {user_id: <str>, intention_name: <str>}
     :return list of user intentions
     """
-    user_name = data.get('user_name')
-    if user_name and user_name != 'current_user':
-        user = db.session.query(User).filter_by(fullname=user_name).first()
-    else:
-        user = _get_user(data['user_id'])
+    user = _get_user(data['user_id'])
     if user.status != 'BLOCKED':
         if user.status == 'OBSOLETE':
             user.status = 'VERIFIED'
@@ -127,11 +123,7 @@ def remove_user_intention(data):
     :param data: dict, {user_id: <str>, intention_name: <str>}
     :return list of user intentions
     """
-    user_name = data.get('user_name')
-    if user_name and user_name != 'current_user':
-        user = db.session.query(User).filter_by(fullname=user_name).first()
-    else:
-        user = _get_user(data['user_id'])
+    user = _get_user(data['user_id'])
     intention = db.session.query(Intention).filter(Intention.name == data['intention_name']).first()
     print('removing: ' + intention.name)
     if intention in user.intentions:
