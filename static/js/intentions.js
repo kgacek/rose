@@ -11,22 +11,21 @@ function genSelect(data, select_name) {
     return select
 }
 
-function selectIntention(data) {
+function selectIntention(data, user_id) {
     var id = document.createElement("INPUT");
+    id.id="user_id"
     id.name="user_id";
-    id.value=fb_user_id;
+    id.value=user_id;
     id.style.display = 'none';
     document.getElementById('newIntention').appendChild(id);
     document.getElementById('newIntentionDiv').appendChild(genSelect(data, 'intention_name'));
 
 }
 
-function IntentionForm(){
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_all_intentions", {
-        user_psid: fb_user_psid,
-        user_id: fb_user_id,
-    }, function (data) {
-        selectIntention(data);
+function IntentionForm(user_id){
+    $.getJSON("https://www.rozamaria.pl/_get_all_intentions",
+    function (data) {
+        selectIntention(data, user_id);
     });
 }
 
@@ -55,7 +54,7 @@ function genIntentionList(approved, pending) {
 }
 
 function showStatus(user_id) {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
+    $.getJSON("https://www.rozamaria.pl/_get_users_intentions", {
         user_id: user_id
     }, function (data) {
         var status = document.getElementById('statusTitle')
@@ -80,18 +79,18 @@ function showStatus(user_id) {
 function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
-        fb_user_psid = false; // todo: poprawic
         fb_user_id = response.authResponse["userID"];
         showStatus(fb_user_id);
-        if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
+        if (['10205894962648737', '10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681', '838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
+            userList("userList", function (){document.getElementById('user_id').value=this.value; showStatus(this.value); })
         }else {
             updateNavbar('connected');
         }
-        IntentionForm()
+        IntentionForm(fb_user_id)
     }
     else{
-    window.location.replace("https://kgacek.pythonanywhere.com/");
+    window.location.replace("https://www.rozamaria.pl/");
 
     }
 }

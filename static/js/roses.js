@@ -1,37 +1,42 @@
-function setMysteries(intention, rose) {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_free_mysteries", {
-        rose: rose
-    }, function (data) {
-        var select = document.getElementById(intention + "_mystery");
-        while (select.firstChild) {
-            select.removeChild(select.firstChild);
-        }
-        select.name = intention + "_mystery";
-        for (var i = 0; i < data.length; i++) {
-            var option = document.createElement('option');
-            option.value = data[i];
-            option.text = data[i];
-            select.appendChild(option);
-        }
-    });
+function setMysteries(intentionSel, rose) {
+    var select = document.getElementById(intentionSel.id + "_mystery");
+    while (select.firstChild) {
+        select.removeChild(select.firstChild);
+    }
+    if (rose === 'blank'){
+        intentionSel.removeAttribute("name");
+        select.removeAttribute("name");
+        var option = document.createElement('option');
+        option.text = "Najpierw wybierz Patrona";
+        select.appendChild(option);
+    }
+    else{
+        $.getJSON("https://www.rozamaria.pl/_get_free_mysteries", {
+            rose: rose
+        }, function (data) {
+            intentionSel.name = intentionSel.id;
+            select.name = intentionSel.id + "_mystery";
+            for (var i = 0; i < data.length; i++) {
+                var option = document.createElement('option');
+                option.value = data[i];
+                option.text = data[i];
+                select.appendChild(option);
+            }
+        });
+    }
 
 }
-function genTable(data) {
-    var myForm = document.getElementById('myForm');
+
+function genTable(data, user_id) {
+    var myForm = document.getElementById('myFormDiv');
     while (myForm.firstChild) {
         myForm.removeChild(myForm.firstChild);
     }
     var head = document.createElement("INPUT");
     head.name="user_id";
-    head.value=fb_user_id;
+    head.value=user_id;
     head.style.display = 'none';
     myForm.appendChild(head)
-    head = document.createElement("INPUT");
-    head.name="refresh_url";
-    head.value="https://kgacek.pythonanywhere.com/roses";
-    head.style.display = 'none';
-    myForm.appendChild(head)
-
     for (intention in data) {
         var fieldset = document.createElement("FIELDSET");
         var container = document.createElement("DIV");
@@ -44,10 +49,14 @@ function genTable(data) {
         head.className='form';
         container.appendChild(head);
         var select = document.createElement('select');
-        select.name=intention;
-        select.onchange= function (){setMysteries(this.name, this.value);};
+        select.id=intention;
+        select.onchange= function (){setMysteries(this, this.value);};
+        var option = document.createElement('option');
+        option.text = 'Wybierz swojego Patrona';
+        option.value = 'blank';
+        select.appendChild(option);
         for (rose in data[intention]) {
-            var option = document.createElement('option');
+            option = document.createElement('option');
             option.value = data[intention][rose];
             option.text = data[intention][rose];
             select.appendChild(option);
@@ -62,10 +71,12 @@ function genTable(data) {
         container.appendChild(head);
         select = document.createElement('select');
         select.id=intention + "_mystery";
+        option = document.createElement('option');
+        option.text = 'Najpierw wybierz Patrona';
+        select.appendChild(option);
         container.appendChild(select);
         fieldset.appendChild(container);
         myForm.appendChild(fieldset);
-        setMysteries(intention, data[intention][0])
     }
     var btn = document.createElement('BUTTON');
     btn.innerText = "Zapisz mnie";
@@ -94,21 +105,25 @@ function genUlPrayer(data){
     return ul;
 }
 
-function user_prayers() {
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_prayers", {
-        user_id: fb_user_id
+function user_prayers(user_id) {
+    $.getJSON("https://www.rozamaria.pl/_get_users_prayers", {
+        user_id: user_id
     }, function (data) {
         var prayers = document.getElementById('prayers');
         while (prayers.firstChild) {
             prayers.removeChild(prayers.firstChild);
         }
+        var notification = document.createElement('p')
         if(Object.keys(data).length > 0){
             var ul = document.createElement('UL')
             var approve_needed=false;
             for (var patron in data){
                 console.log(patron);
-                var li = document.createElement('LI')
-                li.innerText=patron;
+                var li = document.createElement('LI');
+                var span = document.createElement('SPAN');
+                span.title=data[patron]['intention'];
+                span.innerText=patron;
+                li.appendChild(span)
                 li.appendChild(genUlPrayer(data[patron]));
                 ul.appendChild(li);
                 if(data[patron]['next_status'] === 'TO_APPROVAL')
@@ -124,36 +139,38 @@ function user_prayers() {
             }
             btn.className = "myButton";
             btn.name = 'user_id';
-            btn.value = fb_user_id;
+            btn.value = user_id;
             btn.setAttribute("form", "userSub");
             prayers.appendChild(btn)
+            notification.innerText='Pomyliłeś się? Wróć do zakładki "moje intencje", wybierz i usuń intencję w której zrobiłeś błąd - Będziesz mógł dodać ją jeszcze raz.'
         }
         else{
-        var notification = document.createElement('p')
-        notification.className='warning'
-        notification.innerText='Nie zostałeś jeszcze przypisany do żadnej Róży. Przydział może nastąpić nawet do 24h po zatwierdzeniu konta przez Administratora, proszę czekać!'
-        prayers.appendChild(notification)
+        notification.innerText='Prosimy o cierpliwość! Niedługo zostaniesz przydzielony do Róży w Intencji, którą wybrałeś.'
         }
+        prayers.appendChild(notification)
 
     });
 
 }
 
+function clean_forms(){
+    var myForm = document.getElementById('myFormDiv');
+    while (myForm.firstChild) {
+        myForm.removeChild(myForm.firstChild);
+    }
+}
 
-
-
-function already_user() {
+function already_user(user_id) {
     document.getElementById('choice_buttons').style.display = 'none';
-    $.getJSON("https://kgacek.pythonanywhere.com/_get_users_intentions", {
-        user_id: fb_user_id
+    $.getJSON("https://www.rozamaria.pl/_get_users_intentions", {
+        user_id: user_id
     }, function (data) {
         if (!data['active']){
             document.getElementById('statusTitle').innerText = 'Twoje konto nie zostało jeszcze zatwierdzone przez Administratora, cierpliwości!';
         }
         else if (Object.keys(data['intentions']).length > 0) {
             document.getElementById('statusTitle').innerText = 'Wybierz Patrona i aktualnie odmawianą tajemnicę dla każdej róży w której uczestniczysz:';
-            document.getElementById('myForm').style.display = 'block';
-            genTable(data['intentions']);
+            genTable(data['intentions'], user_id);
         }
         else if (Object.keys(data['already_assigned']).length > 0) {
             document.getElementById('statusTitle').innerText = 'Masz już przypisane tajemnice dla wszystkich Intencji w których się modlisz.';
@@ -170,15 +187,17 @@ function LoginCallback(response) {
     console.log('LoginCallback');
     if (response.status === 'connected') {
         fb_user_id = response.authResponse["userID"];
-        if (response.authResponse["userID"] === '2648811858479034') { //TODO: trzeba dodac liste adminow
+        if (['10205894962648737', '10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
+            document.getElementById('status').style.display = 'block';
+            userList("userList", function (){user_prayers(this.value); clean_forms(); already_user(this.value);})
+            already_user(fb_user_id)
         } else {
             updateNavbar('connected');
         }
-        already_user()
-        user_prayers()
+        user_prayers(fb_user_id)
     }
     else{
-    window.location.replace("https://kgacek.pythonanywhere.com/");
+    window.location.replace("https://www.rozamaria.pl/");
     }
 }

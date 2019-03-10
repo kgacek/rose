@@ -11,12 +11,91 @@
 <script type=text/javascript src="/static/js/admin.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
+<div class="desc bar">
+    <h3>Utwórz dodatkowe konto</h3>
+    <div>
+        <form id="createUserSelectForm" action="https://www.rozamaria.pl/_create_functional_user" method="post">
+            <fieldset id="createUserSelect">
+                <legend>Dodatkowe konto dla istniejącego użytkownika</legend>
+                Wybierz z listy użytkownika, dla ktorego chcesz stworzyć dodatkowe konto - Kiedy osoba modli się w kilku różach w tej samej intencji(np Psalmy)<br>
+            </fieldset>
+            <input type="text" name="refresh_url" value="https://www.rozamaria.pl/admin" style='display: none'>
+        </form>
+        <input type="submit" value="stwórz" form="createUserSelectForm" class="myButton">
+    </div>
+    <div>
+        <form action="https://www.rozamaria.pl/_create_functional_user" method="post">
+            <fieldset>
+                <legend>Konto dla użytkownika z poza FB</legend>
+                <input type="text" name="refresh_url" value="https://www.rozamaria.pl/admin" style='display: none'>
+                Podaj unikalną nazwę dla nowego użytkownika:<br>
+                <input type="text" name="non_fb_user" class="name">
+            </fieldset>
+            <input type="submit" value="stwórz" class="myButton">
+        </form>
+    </div>
+    <p>Po utworzeniu konta przypisz tej osobie intencję i różę! konta tutaj utworzone będą miały w nazwie specialne znaki tj. np. "._Krzysztof Gacek._"</p>
+</div>
 <div id="status" class="desc bar">
-    <h3 id="statusTitle">Zaloguj się do aplikacji aby zobaczyć do jakich Intencji jesteś zapisany.</h3>
-    <form id="usersList" action="https://kgacek.pythonanywhere.com/_new_users" method="post" style='display: none'>
+    <h3 id="statusTitle">Odśwież stronę!</h3>
+    <form id="usersList" action="https://www.rozamaria.pl/_new_users" method="post" style='display: none'>
         <div id="divUsersList"></div>
         <br>
         <input type="submit" value="zaakceptuj" class="myButton"><br>
+    </form>
+    <p>w tym miejscu akceptujemy nowych użytkowników. Osoby przeniesione z Facebooka, które już mają przypisaną intencję są akceptowane automatycznie! jeśli widzisz tutaj osobę ze swojej róży to
+        najprawdopodobniej aplikacja nie potrafiła połaczyć kont (porównaj nazwy użytkownika). W takim przypadku Admin musi wypisać tymczasowe konto ze wszystkich róż i zapisać w to miejsce nowe.</p>
+</div>
+<div class="desc bar">
+    <h3>Status</h3>
+    <p>tutaj wyświetlają się tabele dla wszystkich aktywnych Róż</p>
+    <h4>wybierz intencje</h4>
+    <select name="intentionSelect" onchange="showIntentions(this.value);">
+        <option value="all">wszystkie</option>
+        {% for intention, roses in status_table.items() %}
+        <option value="{{intention}}">{{intention}}</option>
+        {% endfor %}
+    </select>
+    <form action="https://www.rozamaria.pl/_remove_users_intention" method="post" accept-charset="UTF-8">
+        <div id="intentionsStatus">
+            {% for intention, roses in status_table.items() %}
+            <div id="{{intention}}">
+                <h4>{{intention}}</h4>
+                {% for rose, users in roses.items() %}
+                <table class="statTable">
+                    <thead>
+                    <tr>
+                        <th colspan="4">{{rose}}</th>
+                    </tr>
+                    <tr>
+                        <th>Użytkownik</th>
+                        <th>Tajemnica</th>
+                        <th>Status</th>
+                        <th>Akcja</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in users %}
+                    {% if data[3] != data[0] %}
+                    <tr class="active">
+                    {% else %}
+                    <tr>
+                    {% endif %}
+                        <td>{{data[0]}}</td>
+                        <td>{{data[2]}}</td>
+                        <td>{{data[1]}}</td>
+                        <td><input type="checkbox" name="{{data[3]}}" value="{{intention}}"></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <br>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <input id="admin_id" name="admin_id" value="None" style='display: none'>
+        <input type="submit" value="usuń" class="myButton"><br>
     </form>
 </div>
 </body>
