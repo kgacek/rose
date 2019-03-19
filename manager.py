@@ -58,6 +58,25 @@ def fill_db():
     session.commit()
 
 
+def add_descriptions():
+    logging.info("add_descriptions() executed")
+
+    session = Session()
+    with open(CONFIG['inputs']['descriptions']) as yaml_file:
+        in_data = yaml.load(yaml_file)
+
+    # add intentions
+    for key, val in in_data['intentions'].items():
+        intention = session.query(Intention).filter_by(name=key).first()
+        intention.prayer = val
+
+    # add roses with patrons
+    for patron, prayer in in_data['patrons'].items():
+        pat = session.query(Patron).filter_by(name=patron).first()
+        pat.prayer = prayer
+    session.commit()
+
+
 class Manager(object):
     def __init__(self):
         self.session = Session()

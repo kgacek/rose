@@ -118,7 +118,7 @@ function addIntentionPrayer(intention, prayer){
     var prayers = document.getElementById('intentionsPrayers');
     var head = document.createElement('h4');
     var p = document.createElement('p');
-    head.innerText=patron;
+    head.innerText=intention;
     p.innerText=prayer;
     prayers.appendChild(head);
     prayers.appendChild(p);
