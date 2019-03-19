@@ -157,7 +157,8 @@ def get_user_prayers(user_id):
             else:
                 status = 'APPROVED'
             rose_name = get_free_rose_name(asso.rose.patron.name, prayers)
-            prayers[rose_name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name}
+            prayers[rose_name] = {'ends': str(asso.rose.ends), 'current': current_mystery.name, 'next': next_mystery.name, 'next_status': status, 'intention': asso.rose.intention.name,
+                                  'patron_prayer': asso.rose.patron.prayer, 'intention_prayer': asso.rose.intention.prayer}
     logging.debug(str(prayers))
     return prayers
 

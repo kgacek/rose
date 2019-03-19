@@ -105,11 +105,38 @@ function genUlPrayer(data){
     return ul;
 }
 
+function addPatronPrayer(patron, prayer){
+    var prayers = document.getElementById('patronsPrayers');
+    var head = document.createElement('h4');
+    var p = document.createElement('p');
+    head.innerText=patron;
+    p.innerText=prayer;
+    prayers.appendChild(head);
+    prayers.appendChild(p);
+}
+function addIntentionPrayer(intention, prayer){
+    var prayers = document.getElementById('intentionsPrayers');
+    var head = document.createElement('h4');
+    var p = document.createElement('p');
+    head.innerText=patron;
+    p.innerText=prayer;
+    prayers.appendChild(head);
+    prayers.appendChild(p);
+}
+
 function user_prayers(user_id) {
     $.getJSON("https://www.rozamaria.pl/_get_users_prayers", {
         user_id: user_id
     }, function (data) {
-        var prayers = document.getElementById('prayers');
+        var prayers = document.getElementById('patronsPrayers');
+        while (prayers.firstChild) {
+            prayers.removeChild(prayers.firstChild);
+        }
+        prayers = document.getElementById('intentionsPrayers');
+        while (prayers.firstChild) {
+            prayers.removeChild(prayers.firstChild);
+        }
+        prayers = document.getElementById('prayers');
         while (prayers.firstChild) {
             prayers.removeChild(prayers.firstChild);
         }
@@ -128,6 +155,11 @@ function user_prayers(user_id) {
                 ul.appendChild(li);
                 if(data[patron]['next_status'] === 'TO_APPROVAL')
                     approve_needed = true;
+
+                if(data[patron]['patron_prayer'] != null)
+                    addPatronPrayer(patron, data[patron]['patron_prayer']);
+                if(data[patron]['intention_prayer'] != null)
+                    addIntentionPrayer(data[patron]['intention'], data[patron]['intention_prayer']);
             }
             prayers.appendChild(ul);
             var btn = document.createElement('BUTTON');

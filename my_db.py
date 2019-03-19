@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import MetaData, Column, Date, String, Integer, ForeignKey, Table, ForeignKeyConstraint
+from sqlalchemy import MetaData, Column, Date, String, Text, Integer, ForeignKey, Table, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -64,6 +64,7 @@ class Intention(Base):
     __tablename__ = 'intentions'
     id = Column(String(60), primary_key=True)
     name = Column(String(100))
+    prayer = Column(Text)
     roses = relationship("Rose", back_populates="intention")
     users = relationship("User", secondary=association_table_U_I, back_populates="intentions")
 
@@ -76,6 +77,7 @@ class Patron(Base):
     __tablename__ = 'patrons'
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
+    prayer = Column(Text)
     rose = relationship("Rose", uselist=False, back_populates="patron")
 
 

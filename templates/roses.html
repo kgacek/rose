@@ -11,6 +11,7 @@
 <script type=text/javascript src="/static/js/roses.js"></script>
 <script type=text/javascript src="/static/js/fbload.js"></script>
 {% include 'header.html' %}
+
 <div id="prayersSection" class="desc bar">
     <h3>Twoje Tajemnice</h3>
     <p>Znajdziesz tutaj wszystkie rozważane tajemnice Różańca na bieżący i przyszły miesiąc (wraz z informacją o terminie zmiany tajemnic). Pod Twoimi Różami widnieje przycisk potwierdzający modlitwę.
@@ -29,6 +30,19 @@
         <input type="text" name="refresh_url" value="https://www.rozamaria.pl/roses" style='display: none'>
         <div id="myFormDiv"></div>
     </form>
+</div>
+<div id="description" class="desc bar">
+    <h4>JAK SIĘ MODLIMY W RÓŻACH?</h4>
+    <ol>
+        <li>Czytamy akt zawierzenia (w dniu przystąpienia, w pozostałe dni - dla chętnych)</li>
+        <li>Czytamy modlitwę za wstawiennictwem Patrona swojej Róży (w dniu przystąpienia, w pozostałe dni - dla chętnych)</li>
+        <li>Czytamy rozważania do swojej tajemnicy.</li>
+        <li>Każdy odmawia 1 dziesiątkę Różańca Świętego do której został przydzielony.</li>
+        <li>Pierwsza osoba odmawia: Wierzę w Boga, Ojcze nasz, 3× Zdrowaś Maryjo, Chwała Ojcu.</li>
+        <li>Ostatnia osoba: Pod Twoją obronę + Znak Krzyża.</li>
+    </ol>
+    <div id="intentionsPrayers"></div>
+    <div id="patronsPrayers"></div>
 </div>
 <form id="userSub" action="https://www.rozamaria.pl/_get_users_prayers" method="post" accept-charset="UTF-8" style='display: none'>
     <input type="text" name="refresh_url" value="https://www.rozamaria.pl/roses" style='display: none'>
