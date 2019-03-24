@@ -73,7 +73,10 @@ def add_descriptions():
     # add roses with patrons
     for patron, prayer in in_data['patrons'].items():
         pat = session.query(Patron).filter_by(name=patron).first()
-        pat.prayer = prayer
+        if not pat:
+            logging.warning(patron)
+        else:
+            pat.prayer = prayer
     session.commit()
 
 
