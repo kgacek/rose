@@ -123,7 +123,7 @@ class Manager(object):
         patron = self.session.query(Patron).filter(Patron.rose == None).first()  # todo handling case when no patrons left
         logging.info('-- Attaching user {} to rose:{} intention:{}'.format(user.fullname, patron.name, intention.name))
         rose = Rose(intention_id=intention.id,
-                    ends=date.today() + relativedelta(months=1),
+                    ends=date.today().replace(day=1) + relativedelta(months=1),
                     patron_id=patron.id)
         asso = AssociationUR(status="ACTIVE", rose=rose, user=user)
         self.session.add(asso)
