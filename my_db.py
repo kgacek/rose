@@ -63,7 +63,7 @@ class Intention(Base):
     users - MANY-to-MANY relationship - list of users which are in each intention"""
     __tablename__ = 'intentions'
     id = Column(String(60), primary_key=True)
-    name = Column(String(100))
+    name = Column(String(200))
     prayer = Column(Text)
     roses = relationship("Rose", back_populates="intention")
     users = relationship("User", secondary=association_table_U_I, back_populates="intentions")
@@ -76,7 +76,7 @@ class Patron(Base):
     rose - ONE-to-ONE relationship, every Rose has its own Patron"""
     __tablename__ = 'patrons'
     id = Column(Integer, primary_key=True)
-    name = Column(String(50))
+    name = Column(String(150))
     prayer = Column(Text)
     rose = relationship("Rose", uselist=False, back_populates="patron")
 
