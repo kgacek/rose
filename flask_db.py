@@ -135,7 +135,7 @@ def restore_user(data):
     :param data: dict, {user_id: <str>, rose_name: <str>}
     :return list of user intentions
     """
-    association = db.session.query(AssociationUR).filter(AssociationUR.user_id == data['user_id']).filter(AssociationUR.rose.patron.name == data['rose_name']).first()
+    association = db.session.query(AssociationUR).join(Rose).join(Patron).filter(AssociationUR.user_id == data['user_id']).filter(Patron.name == data['rose_name']).first()
     if association.status == "EXPIRED":
         logging.warning('restoring: ' + association.user.fullname)
         association.status = "ACTIVE"
