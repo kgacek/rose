@@ -76,7 +76,7 @@
                     </thead>
                     <tbody>
                     {% for data in users %}
-                    {% if data[3] != data[0] %}
+                    {% if data[3] != data[0] and  data[1] != 'Wypisany' %}
                     <tr class="active">
                     {% else %}
                     <tr>
