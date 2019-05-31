@@ -106,13 +106,16 @@ class Manager(object):
         for rose in expired_roses:
             rose.ends = rose.ends + relativedelta(months=1)
             for association in rose.users:
-                association.status = "ACTIVE"
-                if rose.intention_id == "642811842749838":  # Psałterz
-                    next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
-                else:
-                    next_id = association.prayers[-1].mystery_id % 20 + 1
-                new = Prayer(mystery_id=next_id, ends=rose.ends)
-                association.prayers.append(new)
+                if association.status == "SUBSCRIBED":
+                    association.status = "ACTIVE"
+                    if rose.intention_id == "642811842749838":  # Psałterz
+                        next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
+                    else:
+                        next_id = association.prayers[-1].mystery_id % 20 + 1
+                    new = Prayer(mystery_id=next_id, ends=rose.ends)
+                    association.prayers.append(new)
+                elif association.status == "ACTIVE":  # 2nd case - user have not subscribed
+                    association.status = "EXPIRED"
         self.session.commit()
 
     def create_new_rose(self, user, intention):
@@ -210,7 +213,7 @@ class Manager(object):
 
 def main():
     manager = Manager()
-    manager.switch_users() 
+    manager.switch_users()
     manager.attach_new_users_to_roses()
 
 

@@ -130,6 +130,24 @@ def remove_user_intention(data):
     return [intention.name for intention in user.intentions]
 
 
+def restore_user(data):
+    """restores expired user.
+    :param data: dict, {user_id: <str>, rose_name: <str>}
+    :return list of user intentions
+    """
+    association = db.session.query(AssociationUR).filter(AssociationUR.user_id == data['user_id']).filter(AssociationUR.rose.patron.name == data['rose_name']).first()
+    if association.status == "EXPIRED":
+        logging.warning('restoring: ' + association.user.fullname)
+        association.status = "ACTIVE"
+        if association.rose.intention_id == "642811842749838":  # Psałterz
+            next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
+        else:
+            next_id = association.prayers[-1].mystery_id % 20 + 1
+        new = Prayer(mystery_id=next_id, ends=association.rose.ends)
+        association.prayers.append(new)
+    db.session.commit()
+
+
 def get_free_rose_name(name, prayers):
     if name in prayers:
         for i in range(1, 100):

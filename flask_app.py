@@ -89,6 +89,19 @@ def remove_users_intention():
     return redirect(url_for('admin'))
 
 
+@app.route('/_restore_users', methods=['GET', 'POST'])
+def restore_users():
+    data = request.form
+    logging.debug(str(data))
+    admin = data['admin_id']
+    logging.warning('Restoring expired users by: {}'.format(admin))
+    for key, val in data.items():
+        if 'admin_id' != key:
+            logging.warning("- Restoring {} in {}".format(key, val))
+            flask_db.restore_user({'user_id': key, 'rose_name': val})
+    return redirect(url_for('admin'))
+
+
 @app.route('/_add_new_user')
 def add_new_user():
     status = 'None'
