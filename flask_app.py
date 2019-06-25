@@ -98,7 +98,7 @@ def restore_users():
     for key, val in data.items():
         if 'admin_id' != key:
             logging.warning("- Restoring {} in {}".format(key, val))
-            flask_db.restore_user({'user_id': key, 'rose_name': val})
+            flask_db.restore_user({'user_id': key.split('__')[0], 'rose_name': val})
     return redirect(url_for('admin'))
 
 

@@ -143,6 +143,7 @@ def restore_user(data):
             next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1
         else:
             next_id = association.prayers[-1].mystery_id % 20 + 1
+        logging.warning(next_id)
         new = Prayer(mystery_id=next_id, ends=association.rose.ends)
         association.prayers.append(new)
     db.session.commit()
