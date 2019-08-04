@@ -247,7 +247,11 @@ def set_user_roses(data):
         user.status = "ACTIVE"
     for intention, rose in intentions.items():
         rose_obj = db.session.query(Rose).join(Intention).join(Patron).filter(Intention.name == intention).filter(Patron.name == rose).first()
-        asso = AssociationUR(status="ACTIVE", rose=rose_obj, user=user)
+        asso = db.session.query(AssociationUR).filter(AssociationUR.user_id == user.global_id).filter(AssociationUR.rose_id == rose_obj.id).first()
+        if asso:
+            asso.status = "ACTIVE"
+        else:
+            asso = AssociationUR(status="ACTIVE", rose=rose_obj, user=user)
         mystery = db.session.query(Mystery).filter_by(name=mysteries[intention]).first()
         prayer = Prayer(mystery_id=mystery.id, ends=rose_obj.ends)
         asso.prayers.append(prayer)
