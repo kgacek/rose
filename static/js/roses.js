@@ -1,3 +1,17 @@
+MonthName = new Array(12) 
+MonthName[0] = "styczeń " 
+MonthName[1] = "luty " 
+MonthName[2] = "marzec " 
+MonthName[3] = "kwiecień " 
+MonthName[4] = "maj " 
+MonthName[5] = "czerwiec " 
+MonthName[6] = "lipiec " 
+MonthName[7] = "sierpień " 
+MonthName[8] = "wrzesień " 
+MonthName[9] = "październik " 
+MonthName[10] = "listopad " 
+MonthName[11] = "grudzień " 
+
 function setMysteries(intentionSel, rose) {
     var select = document.getElementById(intentionSel.id + "_mystery");
     while (select.firstChild) {
@@ -85,17 +99,19 @@ function genTable(data, user_id) {
 
 }
 function genUlPrayer(data){
+    var current = new Date() 
+    var next = new Date(data['ends']) 
     var ul = document.createElement('UL');
     var li = document.createElement('LI');
     if(data['next_status'] === 'TO_APPROVAL')
         var _class= "warning";
     else if (data['next_status'] === 'APPROVED')
         var _class= "approved";
-    li.innerText='aktualna tajemnica:  '+ data['current'];
+    li.innerText='tajemnica na '+ MonthName[current.getMonth()] +':  '+ data['current'];
     li.className= "approved";
     ul.appendChild(li);
     li = document.createElement('LI');
-    li.innerText='następna tajemnica:  ' + data['next'];
+    li.innerText='tajemnica na ' + MonthName[next.getMonth()] + ': ' + data['next'];
     li.className= _class;
     ul.appendChild(li);
     li = document.createElement('LI');
@@ -163,10 +179,16 @@ function user_prayers(user_id) {
             }
             prayers.appendChild(ul);
             var btn = document.createElement('BUTTON');
+
+            var current = new Date() 
             if (approve_needed)
                 btn.innerText = "Potwierdzam uczestnictwo w przyszłym miesiącu";
             else {
-                btn.innerText = "Nie możesz jeszcze potwierdzić";
+                if (current.getDate() > 20){
+                btn.innerText = "potwierdziłeś modlitwę w miesiącu " + MonthName[current.getMonth()+1];
+                }else{
+                btn.innerText = "potwierdziłeś modlitwę w miesiącu " + MonthName[current.getMonth()];
+                }
                 btn.disabled = true;
             }
             btn.className = "myButton";

@@ -24,4 +24,4 @@ inputs:
   descriptions:
     'patrons.yaml'
 reminder_offset:
-  7
+  10
