@@ -165,7 +165,7 @@ def get_user_prayers(user_id):
     prayers = {}
     logging.debug("Getting user prayers information")
     for asso in get_user_rose_association(user_id):
-        if asso.status != 'EXPIRED':
+        if asso.status not in ('EXPIRED', 'BLOCKED'):
             current_mystery = asso.prayers[-1].mystery
             if asso.rose.intention_id == "642811842749838":  # Psałterz
                 next_mystery = db.session.query(Mystery).filter_by(id=current_mystery.id % 170 + (current_mystery.id // 170)*20 + 1).first()
@@ -201,7 +201,7 @@ def get_user_intentions(user_psid, user_id):
     for intention in user.intentions:
         intentions[intention.name] = []
         for rose in intention.roses:
-            if rose.id in [rose.rose_id for rose in user.roses if rose.status != 'EXPIRED']:
+            if rose.id in [rose.rose_id for rose in user.roses if rose.status not in ('EXPIRED', 'BLOCKED')]:
                 del intentions[intention.name]
                 already_assigned[intention.name] = rose.patron.name
                 break
@@ -227,7 +227,8 @@ def get_all_status():
                 stat[intention.name][rose.patron.name] = []
                 for asso in rose.users:
                     mystery = asso.prayers[-1].mystery if asso.prayers else '--'
-                    stat[intention.name][rose.patron.name].append((asso.user.fullname, STAT.get(asso.status, ''), mystery.name, asso.user.global_id, mystery.id))
+                    if asso.status  != 'BLOCKED':
+                        stat[intention.name][rose.patron.name].append((asso.user.fullname, STAT.get(asso.status, ''), mystery.name, asso.user.global_id, mystery.id))
                 stat[intention.name][rose.patron.name].sort(key=status_sort)
         if not stat[intention.name]:
             del stat[intention.name]
