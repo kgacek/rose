@@ -102,7 +102,7 @@ class Manager(object):
         """Assigns new prayers to users who subscribed, and marks UR asso as EXPIRED for those who don't"""
         # ToDo fix return value or remove it if not necessary
         logging.info("Switching users to next mysteries..")
-        expired_roses = self.session.query(Rose).filter(Rose.ends + timedelta(days=4) == date.today()).all()
+        expired_roses = self.session.query(Rose).filter(Rose.ends < date.today() - relativedelta(days=4)).all()
         for rose in expired_roses:
             rose.ends = rose.ends + relativedelta(months=1)
             for association in rose.users:
