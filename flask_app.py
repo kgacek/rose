@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, jsonify, request, render_template, redirect, url_for
-from pymessenger.bot import Bot
+import facebook
 
 import flask_db
 import yaml
@@ -24,7 +24,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 flask_db.db.init_app(app)
-bot = Bot(CONFIG['token']['test'])
+bot = facebook.GraphAPI(access_token=CONFIG['token']['test'], version='3.1')
 
 
 @app.route('/')
@@ -108,7 +108,7 @@ def add_new_user():
     user_id = request.args.get('user_id')
     user_psid = request.args.get('user_psid')
     if user_id:
-        username = bot.get_user_info(user_id)['name']
+        username = bot.get_object(user_id)['name']
         status = flask_db.connect_user_id(user_id, user_psid, username)
     return jsonify({'status': status})
 
@@ -168,61 +168,3 @@ def webview():
 @app.route("/login")  # todo remove this
 def login():
     return render_template('webview.html')
-
-
-# We will receive messages that Facebook sends our bot at this endpoint
-@app.route("/_webhook", methods=['GET', 'POST'])
-def receive_message():
-    if request.method == 'GET':
-        """Before allowing people to message your bot, Facebook has implemented a verify token
-        that confirms all requests that your bot receives came from Facebook."""
-        token_sent = request.args.get("hub.verify_token")
-        return verify_fb_token(token_sent)
-    # if the request was not get, it must be POST and we can just proceed with sending a message back to user
-    else:
-        # get whatever message a user sent the bot
-        output = request.get_json()
-        for event in output['entry']:
-            messaging = event['messaging']
-            for message in messaging:
-                if message.get('message'):
-                    # Facebook Messenger ID for user so we know where to send response back to
-                    recipient_id = message['sender']['id']
-                    if message['message'].get('text'):
-                        response_sent_text = process_message(recipient_id, message['message'].get('text'))
-                        send_message(recipient_id, response_sent_text)
-    return "Message Processed"
-
-
-def verify_fb_token(token_sent):
-    # take token sent by facebook and verify it matches the verify token you sent
-    # if they match, allow the request, else return an error
-    if token_sent == CONFIG['token']['verify_webhook']:
-        return request.args.get("hub.challenge")
-    return 'Invalid verification token'
-
-
-def process_message(recipient_id, msg):
-    if "we have new user" in msg:
-        return "Witaj w Aplikacji Róż Różańca. Wybierz 'Uruchom Aplikację' aby się zapisać."
-    elif "wypisz" in msg:
-        flask_db.unsubscribe_user(user_psid=recipient_id)
-        return "Zostaleś wypisany."
-    elif "zapisz" in msg:  # ToDo remove after review
-        return "Zostaleś zapisany."
-    elif "potwierdzam" == msg:
-        flask_db.subscribe_user(user_psid=recipient_id)
-        return "Świetnie ;) oczekuj na informację z przydzieloną tajemnicą"
-    else:
-        return "Nie rozumiem"
-
-
-# uses PyMessenger to send response to user
-def send_message(recipient_id, response):
-    if recipient_id:
-        # sends user the text message provided via input response parameter
-        logging.debug("Sending msg: '{0}' to '{1}'".format(response, recipient_id))
-        bot.send_text_message(recipient_id,  response)
-        return "success"
-    else:
-        return "fail"
