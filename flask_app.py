@@ -24,7 +24,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
 flask_db.db.init_app(app)
-bot = facebook.GraphAPI(access_token=CONFIG['token']['test'], version='3.1')
+bot = facebook.GraphAPI(access_token=CONFIG['token']['test'], version='6.0')
 
 
 @app.route('/')
