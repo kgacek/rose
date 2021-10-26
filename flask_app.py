@@ -36,6 +36,11 @@ def index():
 def intentions():
     return render_template('intentions.html')
 
+@app.route('/policy')
+def policy():
+    return render_template('policy.html')
+
+
 
 @app.route('/roses')
 def roses():
