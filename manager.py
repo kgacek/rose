@@ -102,11 +102,11 @@ class Manager(object):
         """Assigns new prayers to users who subscribed, and marks UR asso as EXPIRED for those who don't"""
         # ToDo fix return value or remove it if not necessary
         logging.info("Switching users to next mysteries..")
-        expired_roses = self.session.query(Rose).filter(Rose.ends < date.today() - relativedelta(days=3)).all()
+        expired_roses = self.session.query(Rose).filter(Rose.ends < date.today() - relativedelta(days=10)).all()
         for rose in expired_roses:
             rose.ends = rose.ends + relativedelta(months=1)
             for association in rose.users:
-                if association.status == "SUBSCRIBED":
+                if association.status == "SUBSCRIBED" or association.status == "ACTIVE": # TODO: change that when login will work again
                     association.status = "ACTIVE"
                     if rose.intention_id == "642811842749838":  # Psałterz
                         next_id = association.prayers[-1].mystery_id % 170 + (association.prayers[-1].mystery_id // 170) * 20 + 1

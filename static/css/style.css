@@ -242,3 +242,10 @@ table.statTable tfoot td {
 tr.active {
 background-color: #5df53799;
 }
+
+.text-center {
+  text-align: center;
+}
+footer {
+border-top: 1px solid rgb(67,200,249);
+}

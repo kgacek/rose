@@ -164,7 +164,7 @@ function user_prayers(user_id) {
                 var li = document.createElement('LI');
                 var span = document.createElement('SPAN');
                 span.title=data[patron]['intention'];
-                span.innerText=patron;
+                span.innerText=patron + '- ' + data[patron]['intention'];
                 li.appendChild(span)
                 li.appendChild(genUlPrayer(data[patron]));
                 ul.appendChild(li);
