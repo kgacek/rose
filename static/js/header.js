@@ -49,6 +49,7 @@ function updateNavbar(status){
         btn.innerText="Moje Róże"
         bar.appendChild(btn)
 
+
         if (status === "admin"){
             btn = document.createElement("a");
             btn.className = "navButton"
@@ -56,6 +57,11 @@ function updateNavbar(status){
             btn.innerText="Panel Administratora"
             bar.appendChild(btn)
         }
+        btn = document.createElement("a");
+        btn.className = "logButton"
+        btn.href="https://www.rozamaria.pl/logout"
+        btn.innerText="Wyloguj"
+        bar.appendChild(btn)
     }
     else{
         var container = document.createElement("FORM");
