@@ -4,11 +4,12 @@
     <title>Aplikacja Róża - strona główna</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <script type=text/javascript >
+        console.log("HEAD your id: {{ global_id }}");
+        var global_id="{{ global_id }}";
+    </script>
 </head>
 <body>
-<script type=text/javascript >
-    var global_id="{{ global_id }}";
-</script>
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script type=text/javascript src="/static/js/header.js"></script>
 <script type=text/javascript src="/static/js/index.js"></script>
