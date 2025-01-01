@@ -29,6 +29,8 @@ def _get_user(user_id, create=True, status="NEW"):
     if not user and create:
         user = User(global_id=user_id, status=status)
         db.session.add(user)
+    elif not user:
+        return None
     return user
 
 
