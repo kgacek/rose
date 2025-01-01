@@ -54,11 +54,7 @@ def login():
 
 @app.route('/')
 def index():
-    if current_user.is_anonymous():
-        global_id = ""
-    else:
-        global_id = current_user.global_id
-    return render_template('index.html', global_id=global_id)
+    return render_template('index.html', global_id=current_user.get_id())
 
 
 @app.route('/intentions')

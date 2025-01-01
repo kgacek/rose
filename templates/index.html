@@ -12,7 +12,7 @@
 <script type=text/javascript >
     $(document).ready(function() {
     console.log("Roses are red! your id: {{ global_id }}");
-    if ( "{{ global_id }}" !== '')
+    if ( "{{ global_id }}" !== '' && "{{ global_id }}" !== 'None' && "{{ global_id }}" !== null )
     {
         updateNavbar('connected');
     }else{

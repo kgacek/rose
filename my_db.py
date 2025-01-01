@@ -59,14 +59,7 @@ class User(UserMixin, Base):
     def get_id(self):
         return self.global_id
 
-    def is_authenticated(self):
-        return True
 
-    def is_active(self):
-        return self.status == "ACTIVE"
-
-    def is_anonymous(self):
-        return False
 
 class Intention(Base):
     """Class represents Intentions table.
