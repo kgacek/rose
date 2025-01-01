@@ -18,7 +18,7 @@ function selectUser(data, callback) {
 }
 
 function userList(elemID, callback){
-    $.getJSON("https://www.rozamaria.pl/_get_users",{
+    $.getJSON("/_get_users",{
     status: 'ALL'
     }, function (data) {
         document.getElementById(elemID).style.display = 'block';
@@ -58,12 +58,26 @@ function updateNavbar(status){
         }
     }
     else{
-        btn = document.createElement("a");
-        btn.className = "logButton"
-        btn.href="#"
-        btn.onclick= function(){FB.login(function (response) {LoginCallback(response)}); return false;}
-        btn.innerText="Zaloguj"
-        bar.appendChild(btn)
+        var container = document.createElement("FORM");
+        container.method="POST";
+        container.action="/login";
+        var input = document.createElement("INPUT");
+        input.type = "text";
+        input.name = "login";
+        input.placeholder="twoj login";
+        container.appendChild(input);
+        input = document.createElement("INPUT");
+        input.type = "text";
+        input.name = "password";
+        input.placeholder="twoje haslo"
+        container.appendChild(input);
+        btn = document.createElement("input");
+        btn.className = "logButton";
+        btn.type="submit";
+        btn.value="Zaloguj";
+        btn.name="action";
+        container.appendChild(btn);
+        bar.appendChild(container);
 
     }
 }

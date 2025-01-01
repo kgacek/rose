@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from flask import Flask, jsonify, request, render_template, redirect, url_for
-import facebook
-
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
+from flask_login import LoginManager, login_user, login_required, current_user
 import flask_db
 import yaml
 import os
@@ -23,8 +22,34 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
+#app.config['SECRET_KEY'] = 'secret-key-goes-here'
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 flask_db.db.init_app(app)
-bot = facebook.GraphAPI(access_token=CONFIG['token']['test'], version='6.0')
+login_manager = LoginManager()
+login_manager.login_view = 'app.login'
+login_manager.init_app(app)
+@login_manager.user_loader
+def load_user(user_id):
+    # since the user_id is just the primary key of our user table, use it in the query for the user
+    return flask_db._get_user(user_id, False)
+
+
+@app.route('/login', methods=['POST','GET'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+    else: # login code goes here
+        login = request.form.get('login')
+        password = request.form.get('password')
+        remember = True
+
+        user = flask_db.verify_login_creds(login, password)
+        if not user:
+            flash('Please check your login details and try again.')
+            return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+        login_user(user, remember=remember)
+        # if the above check passes, then we know the user has the right credentials
+        return redirect(url_for('roses'))
 
 
 @app.route('/')
@@ -33,6 +58,7 @@ def index():
 
 
 @app.route('/intentions')
+@login_required
 def intentions():
     return render_template('intentions.html')
 
@@ -41,13 +67,14 @@ def policy():
     return render_template('policy.html')
 
 
-
 @app.route('/roses')
+@login_required
 def roses():
-    return render_template('roses.html')
+    return render_template('roses.html', global_id=current_user.global_id)
 
 
 @app.route('/admin')
+@login_required
 def admin():
     status_table = flask_db.get_all_status()
     return render_template('admin.html', status_table=status_table)
@@ -169,7 +196,5 @@ def create_functional_user():
 def webview():
     return render_template('webview.html')
 
-
-@app.route("/login")  # todo remove this
-def login():
-    return render_template('webview.html')
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

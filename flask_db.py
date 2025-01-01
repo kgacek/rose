@@ -115,6 +115,13 @@ def add_user_intention(data):
     return [intention.name for intention in user.intentions]
 
 
+def verify_login_creds(login, password):
+    user = db.session.query(User).filter_by(fullname=login).first()
+    if user and user.password == password:
+        return user
+    return False
+
+
 def remove_user_intention(data):
     """removes user intention.
     :param data: dict, {user_id: <str>, intention_name: <str>}

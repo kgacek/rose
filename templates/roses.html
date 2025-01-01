@@ -9,7 +9,12 @@
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script type=text/javascript src="/static/js/header.js"></script>
 <script type=text/javascript src="/static/js/roses.js"></script>
-<script type=text/javascript src="/static/js/fbload.js"></script>
+<script type=text/javascript >
+    $(document).ready(function() {
+    console.log("Roses are red!");
+    RoseLoginCallback("{{ global_id }}");
+    });</script>
+
 {% include 'header.html' %}
 
 <div id="prayersSection" class="desc bar">

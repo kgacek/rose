@@ -9,7 +9,11 @@
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script type=text/javascript src="/static/js/header.js"></script>
 <script type=text/javascript src="/static/js/admin.js"></script>
-<script type=text/javascript src="/static/js/fbload.js"></script>
+<script type=text/javascript >
+    $(document).ready(function() {
+    console.log("Roses are red!");
+    AdminLoginCallback("{{ global_id }}");
+    });</script>
 {% include 'header.html' %}
 <div class="desc bar">
     <h3>Utwórz dodatkowe konto</h3>

@@ -236,21 +236,15 @@ function already_user(user_id) {
 
 }
 
-function LoginCallback(response) {
+function RoseLoginCallback(user_id) {
     console.log('LoginCallback');
-    if (response.status === 'connected') {
-        fb_user_id = response.authResponse["userID"];
-        if (['127973684951857', '10205894962648737', '10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(response.authResponse["userID"]) >= 0) { //TODO: trzeba dodac liste adminow
+        if (['127973684951857', '10205894962648737', '10218775416925342', '2648811858479034', '2364148863618959', '2417174628322246', '2816839405023046', '322686561691681','838937949798703','1948127701931349','1725926644219720'].indexOf(user_id) >= 0) { //TODO: trzeba dodac liste adminow
             updateNavbar('admin');
             document.getElementById('status').style.display = 'block';
             userList("userList", function (){user_prayers(this.value); clean_forms(); already_user(this.value);})
-            already_user(fb_user_id)
+            already_user(user_id)
         } else {
             updateNavbar('connected');
         }
-        user_prayers(fb_user_id)
-    }
-    else{
-    window.location.replace("https://www.rozamaria.pl/");
-    }
+        user_prayers(user_id)
 }

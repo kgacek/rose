@@ -4,7 +4,7 @@
 from sqlalchemy import MetaData, Column, Date, String, Text, Integer, ForeignKey, Table, ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
+from flask_login import UserMixin
 metadata = MetaData()
 Base = declarative_base(metadata=metadata)
 
@@ -31,7 +31,7 @@ class AssociationUR(Base):
     prayers = relationship('Prayer', primaryjoin="and_(AssociationUR.user_id==Prayer.user_id, AssociationUR.rose_id==Prayer.rose_id)", order_by="Prayer.id")
 
 
-class User(Base):
+class User(UserMixin, Base):
     """
     class represents User table.
     psid - facebook Page Scoped ID - used to communicate on messenger
@@ -39,6 +39,7 @@ class User(Base):
     fullname -'name surname' eg. Krzysztof Gacek
     intentions - MANY-to-MANY relationship - every user can be in many intentions, one intention can have many users
     roses - MANY-to-MANY relationship - every user can be in many roses, one rose can have many users
+    password - user password
     status:
     NEW - after first interactions with our tool
     VERIFIED - when accepted by admin
@@ -51,9 +52,12 @@ class User(Base):
     psid = Column(String(50))  # ToDo consider making this ID as a primary key
     fullname = Column(String(50))
     status = Column(String(50))
+    password = Column(String(50))
     intentions = relationship("Intention", secondary=association_table_U_I, back_populates="users")
     roses = relationship("AssociationUR", back_populates="user")
 
+    def get_id(self):
+        return self.global_id
 
 class Intention(Base):
     """Class represents Intentions table.
