@@ -12,7 +12,12 @@
 <script type=text/javascript >
     $(document).ready(function() {
     console.log("Roses are red! your id: {{ global_id }}");
-    updateNavbar('disconnected');
+    if (global_id !== null && global_id !== undefined && global_id !== '')
+    {
+        updateNavbar('connected');
+    }else{
+        updateNavbar('disconnected');
+    }
     });</script>
 {% include 'header.html' %}
 

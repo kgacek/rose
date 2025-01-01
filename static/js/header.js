@@ -3,7 +3,7 @@ function selectUser(data, callback) {
     select.onchange= callback;
     select.name = "user_global_id";
     var option = document.createElement('option');
-    option.value = fb_user_id;
+    option.value = global_id;
     option.text = 'Ja';
     option.selected = 'selected';
     select.appendChild(option);

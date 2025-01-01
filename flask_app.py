@@ -46,7 +46,7 @@ def login():
         user = flask_db.verify_login_creds(login, password)
         if not user:
             flash('Please check your login details and try again.')
-            return redirect(url_for('login')) # if the user doesn't exist or password is wrong, reload the page
+            return redirect(request.form['refresh_url']) # if the user doesn't exist or password is wrong, reload the page
         login_user(user, remember=remember)
         # if the above check passes, then we know the user has the right credentials
         return redirect(url_for('roses'))
@@ -54,13 +54,13 @@ def login():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', global_id=current_user.global_id)
 
 
 @app.route('/intentions')
 @login_required
 def intentions():
-    return render_template('intentions.html')
+    return render_template('intentions.html', global_id=current_user.global_id)
 
 @app.route('/policy')
 def policy():
@@ -77,7 +77,7 @@ def roses():
 @login_required
 def admin():
     status_table = flask_db.get_all_status()
-    return render_template('admin.html', status_table=status_table)
+    return render_template('admin.html', status_table=status_table, global_id=current_user.global_id)
 
 
 @app.route('/_new_users', methods=['GET', 'POST'])
