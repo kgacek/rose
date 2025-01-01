@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = CONFIG['sql']['rose']['full_address'].replace('{pass}', PASSWORD)
 app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
-#app.config['SECRET_KEY'] = 'secret-key-goes-here'
-#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'secret-key-goes-here'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 flask_db.db.init_app(app)
 login_manager = LoginManager()
 login_manager.login_view = 'app.login'
