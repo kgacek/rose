@@ -9,7 +9,11 @@
 <script type=text/javascript src="/static/js/jquery.js"></script>
 <script type=text/javascript src="/static/js/header.js"></script>
 <script type=text/javascript src="/static/js/index.js"></script>
-<script type=text/javascript src="/static/js/fbload.js"></script>
+<script type=text/javascript >
+    $(document).ready(function() {
+    console.log("Roses are red!");
+    updateNavbar('disconnected');
+    });</script>
 {% include 'header.html' %}
 
 <div id="decription" class="desc bar">
