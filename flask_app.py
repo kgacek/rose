@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
-from flask_login import LoginManager, login_user, login_required, current_user
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 import flask_db
 import yaml
 import os
@@ -51,6 +51,12 @@ def login():
         # if the above check passes, then we know the user has the right credentials
         return redirect(url_for('roses'))
 
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():
