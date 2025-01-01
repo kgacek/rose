@@ -60,16 +60,19 @@ function updateNavbar(status){
     else{
         var container = document.createElement("FORM");
         container.method="POST";
+        container.style="display: inline-block;";
         container.action="/login";
         var input = document.createElement("INPUT");
         input.type = "text";
         input.name = "login";
+        input.className = "navButton";
         input.placeholder="twoj login";
         container.appendChild(input);
         input = document.createElement("INPUT");
         input.type = "text";
         input.name = "password";
-        input.placeholder="twoje haslo"
+        input.className = "navButton";
+        input.placeholder="haslo"
         container.appendChild(input);
         btn = document.createElement("input");
         btn.className = "logButton";
